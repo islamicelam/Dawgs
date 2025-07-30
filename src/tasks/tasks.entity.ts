@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Task {
@@ -10,4 +11,7 @@ export class Task {
 
     @Column({ default: false })
     isDone: boolean;
+
+    @ManyToOne(() => User, (user) => (user.tasks), {eager: false, onDelete: 'CASCADE'})
+    user: string
 }
