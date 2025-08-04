@@ -10,7 +10,7 @@ export class TasksController {
 
   @Post()
   create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.tasksService.create(createTaskDto.title);
+    return this.tasksService.create(createTaskDto);
   }
 
   @Get()
