@@ -20,7 +20,7 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
-  findAll() {
+  findAll(email: string) {
     return `This action returns all users`;
   }
 

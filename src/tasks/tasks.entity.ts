@@ -9,9 +9,12 @@ export class Task {
     @Column()
     title: string;
 
-    @Column({ default: false })
-    isDone: boolean;
+    @Column()
+    description: string;
+
+    @Column()
+    assign: User;
 
     @ManyToOne(() => User, (user) => (user.tasks), {eager: false, onDelete: 'CASCADE'})
-    user: string
+    user: User
 }

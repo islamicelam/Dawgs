@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Task } from './tasks.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -18,8 +18,12 @@ export class TasksService {
     return this.taskRepo.save(task);
   }
 
-  findAll(): Promise<Task[]> {
+  getAll(): Promise<Task[]> {
     return this.taskRepo.find();
+  }
+
+  findByAssignes(assignIds: number[]): Promise<Task[]> {
+    return this.taskRepo.find({where: {assign: {id: In(assignIds)}}});
   }
 
   findOne(id: number): Promise<Task | null> {
