@@ -20,8 +20,9 @@ export class TasksController {
   }
 
   @Get()
-  findByAssign(@Query('assignId') assignIds: number[]): Promise<Task[]> {
-    return this.tasksService.findByAssignes(assignIds);
+  findByAssignes(@Query('assignId') assignIds: string[]): Promise<Task[]> {
+    const ids = assignIds.map(id => Number(id));
+    return this.tasksService.findByAssignes(ids);
   }
 
   @Get(':id')

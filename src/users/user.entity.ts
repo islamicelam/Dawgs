@@ -17,6 +17,6 @@ export class User {
     @Column({default: 'user'})
     role: UserRole;
 
-    @OneToMany(() => Task, (task) => task.user)
+    @OneToMany(() => Task, (task) => task.assign)
     tasks: Task[];
 }

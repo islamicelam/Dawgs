@@ -23,7 +23,7 @@ export class TasksService {
   }
 
   findByAssignes(assignIds: number[]): Promise<Task[]> {
-    return this.taskRepo.find({where: {assign: {id: In(assignIds)}}});
+    return this.taskRepo.find({where: {assign: {id: In(assignIds)}}, relations: ['assign']});
   }
 
   findOne(id: number): Promise<Task | null> {
