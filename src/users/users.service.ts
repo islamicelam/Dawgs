@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -16,23 +15,23 @@ export class UsersService {
 
   async createUser(userDto: CreateUserDto) {
     const hash = await bcrypt.hash(userDto.password, 10);
-    const user = this.userRepo.create({...userDto, password: hash});
+    const user = this.userRepo.create({ ...userDto, password: hash });
     return this.userRepo.save(user);
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.userRepo.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepo.findOneBy({ id });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    return { id, ...updateUserDto };
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.userRepo.delete(id);
   }
 }

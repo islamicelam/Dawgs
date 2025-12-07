@@ -1,22 +1,28 @@
-import { Task } from "src/tasks/tasks.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-
-export type UserRole = 'user' | 'admin';
+import { Task } from 'src/tasks/tasks.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { UserRole } from './enums/user-role.enum';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({unique: true})
-    email: string; 
+  @Column()
+  name: string;
 
-    @Column()
-    password: string; 
+  @Column({ unique: true })
+  email: string;
 
-    @Column({default: 'user'})
-    role: UserRole;
+  @Column()
+  password: string;
 
-    @OneToMany(() => Task, (task) => task.user)
-    tasks: Task[];
+  @Column({
+    type: 'text',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
+
+  @OneToMany(() => Task, (task) => task.user)
+  tasks: Task[];
 }
