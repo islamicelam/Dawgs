@@ -5,7 +5,6 @@ import { Task } from './tasks.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 
-
 @Injectable()
 export class TasksService {
   constructor(
@@ -23,7 +22,10 @@ export class TasksService {
   }
 
   findByAssignes(assignIds: number[]): Promise<Task[]> {
-    return this.taskRepo.find({where: {assign: {id: In(assignIds)}}, relations: ['assign']});
+    return this.taskRepo.find({
+      where: { assign: { id: In(assignIds) } },
+      relations: ['assign'],
+    });
   }
 
   findOne(id: number): Promise<Task | null> {

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,7 +18,7 @@ export class UsersService {
     private userRepo: Repository<User>,
 
     @InjectRepository(Task)
-    private taskRepo: Repository<Task>
+    private taskRepo: Repository<Task>,
   ) {}
 
   async createUser(userDto: CreateUserDto) {
@@ -23,10 +27,7 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
-  findAll(email?: string) {
-    if (email) {
-      return this.userRepo.find({ where: { email } });
-    }
+  findAll() {
     return this.userRepo.find();
   }
 
@@ -43,12 +44,12 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     const taskCount = await this.taskRepo.count({
-      where: { assign: { id } }
+      where: { assign: { id } },
     });
-  
+
     if (taskCount > 0) {
       throw new BadRequestException(
-        `User cannot be deleted because they have ${taskCount} assigned tasks`
+        `User cannot be deleted because they have ${taskCount} assigned tasks`,
       );
     }
 

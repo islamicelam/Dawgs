@@ -1,9 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Query,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './tasks.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { User } from 'src/users/user.entity';
 
 @Controller('tasks')
 export class TasksController {
@@ -21,7 +29,7 @@ export class TasksController {
 
   @Get()
   findByAssignes(@Query('assignId') assignIds: string[]): Promise<Task[]> {
-    const ids = assignIds.map(id => Number(id));
+    const ids = assignIds.map((id) => Number(id));
     return this.tasksService.findByAssignes(ids);
   }
 
@@ -31,7 +39,10 @@ export class TasksController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto): Promise<Task> {
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+  ): Promise<Task> {
     return this.tasksService.update(+id, updateTaskDto);
   }
 
