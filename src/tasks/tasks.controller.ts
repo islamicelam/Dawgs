@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './tasks.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { User } from 'src/users/user.entity';
 
 @Controller('tasks')
 export class TasksController {
@@ -14,8 +15,14 @@ export class TasksController {
   }
 
   @Get()
-  findAll(): Promise<Task[]> {
-    return this.tasksService.findAll();
+  getAll(): Promise<Task[]> {
+    return this.tasksService.getAll();
+  }
+
+  @Get()
+  findByAssignes(@Query('assignId') assignIds: string[]): Promise<Task[]> {
+    const ids = assignIds.map(id => Number(id));
+    return this.tasksService.findByAssignes(ids);
   }
 
   @Get(':id')
