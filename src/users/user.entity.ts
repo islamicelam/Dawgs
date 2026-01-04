@@ -1,6 +1,6 @@
 import { Task } from 'src/tasks/tasks.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserRole } from './enums/user-role.enum';
+import { UserRole } from '../auth/roles';
 
 @Entity()
 export class User {
@@ -17,9 +17,8 @@ export class User {
   password: string;
 
   @Column({
-    type: 'text',
-    enum: UserRole,
-    default: UserRole.USER,
+    type: 'varchar',
+    default: 'USER',
   })
   role: UserRole;
 
