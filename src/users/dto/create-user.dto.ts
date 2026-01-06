@@ -17,7 +17,7 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  @MinLength(4)
+  @MinLength(5)
   password: string;
 
   @IsIn(Object.values(USER_ROLES))
