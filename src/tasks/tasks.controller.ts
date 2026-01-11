@@ -6,7 +6,7 @@ import {
   Query,
   Param,
   Post,
-  Put,
+  Patch,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './tasks.entity';
@@ -27,9 +27,14 @@ export class TasksController {
     return this.tasksService.getAll();
   }
 
-  @Get()
-  findByAssignes(@Query('assignId') assignIds: string[]): Promise<Task[]> {
-    const ids = assignIds.map((id) => Number(id));
+  @Get('by-assignee')
+  findByAssignes(
+    @Query('assignId') assignIds: string | string[],
+  ): Promise<Task[]> {
+    const ids = Array.isArray(assignIds)
+      ? assignIds.map(Number)
+      : [Number(assignIds)];
+
     return this.tasksService.findByAssignes(ids);
   }
 
@@ -38,7 +43,7 @@ export class TasksController {
     return this.tasksService.findOne(+id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateTaskDto: UpdateTaskDto,

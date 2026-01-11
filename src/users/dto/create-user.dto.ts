@@ -5,7 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { USER_ROLES, UserRole } from 'src/auth/roles';
+import { USER_ROLES, UserRole } from '../../auth/roles';
 
 export class CreateUserDto {
   @IsEmail()
@@ -17,7 +17,7 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  @MinLength(5)
+  @MinLength(4)
   password: string;
 
   @IsIn(Object.values(USER_ROLES))

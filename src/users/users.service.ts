@@ -44,7 +44,7 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     const taskCount = await this.taskRepo.count({
-      where: { assign: { id } },
+      where: { assignee: { id } },
     });
 
     if (taskCount > 0) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Task } from './tasks.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -22,10 +22,11 @@ export class TasksService {
   }
 
   findByAssignes(assignIds: number[]): Promise<Task[]> {
-    return this.taskRepo.find({
-      where: { assign: { id: In(assignIds) } },
-      relations: ['assign'],
-    });
+    return this.taskRepo
+      .createQueryBuilder('task')
+      .innerJoinAndSelect('task.assign', 'assign')
+      .where('assign.id IN (:...assignIds)', { assignIds })
+      .getMany();
   }
 
   findOne(id: number): Promise<Task | null> {

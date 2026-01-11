@@ -22,6 +22,6 @@ export class User {
   })
   role: UserRole;
 
-  @OneToMany(() => Task, (task: Task) => task.assign)
+  @OneToMany(() => Task, (task: Task) => task.assignee)
   tasks: Task[];
 }
