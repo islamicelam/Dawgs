@@ -1,13 +1,14 @@
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/users.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('tasks')
 export class Task {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,4 +28,7 @@ export class Task {
   })
   @JoinColumn({ name: 'assign_id' })
   assignee: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

@@ -1,8 +1,14 @@
 import { Task } from 'src/tasks/tasks.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserRole } from '../auth/roles';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,4 +30,7 @@ export class User {
 
   @OneToMany(() => Task, (task: Task) => task.assignee)
   tasks: Task[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

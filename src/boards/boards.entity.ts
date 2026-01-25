@@ -1,13 +1,14 @@
 import { Project } from 'src/projects/projects.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('boards')
 export class Board {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,11 +16,14 @@ export class Board {
   @Column()
   name: string;
 
-  @ManyToOne(() => Project, (project: Project) => project.boards, {
+  @ManyToOne(() => Project, (project) => project.boards, {
     eager: true,
-    onDelete: 'RESTRICT',
+    nullable: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'board' })
   board: Board;
-}
 
+  @CreateDateColumn()
+  createdAt: Date;
+}

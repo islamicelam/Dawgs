@@ -1,7 +1,13 @@
 import { Board } from 'src/boards/boards.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity('projects')
 export class Project {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,6 +15,12 @@ export class Project {
   @Column()
   name: string;
 
-  @OneToMany(() => Board, (board: Board) => board.board)
+  @Column({ nullable: true })
+  description: string;
+
+  @OneToMany(() => Board, (board) => board.board)
   boards: Board[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

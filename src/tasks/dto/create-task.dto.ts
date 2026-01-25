@@ -5,7 +5,7 @@ import {
   IsNumber,
   IsOptional,
 } from 'class-validator';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/users.entity';
 
 export class CreateTaskDto {
   @IsString()

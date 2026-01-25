@@ -5,7 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/users.entity';
 
 export class UpdateTaskDto {
   @IsString()
