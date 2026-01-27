@@ -28,7 +28,7 @@ export class User {
   })
   role: UserRole;
 
-  @OneToMany(() => Task, (task: Task) => task.assignee)
+  @OneToMany(() => Task, (task: Task) => task.assign)
   tasks: Task[];
 
   @CreateDateColumn()

@@ -27,7 +27,7 @@ export class Task {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'assign_id' })
-  assignee: User;
+  assign: User;
 
   @CreateDateColumn()
   createdAt: Date;
