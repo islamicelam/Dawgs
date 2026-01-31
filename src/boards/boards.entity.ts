@@ -17,12 +17,11 @@ export class Board {
   name: string;
 
   @ManyToOne(() => Project, (project) => project.boards, {
-    eager: true,
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'board' })
-  board: Board;
+  @JoinColumn({ name: 'projectId' })
+  project: Project;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -18,7 +18,7 @@ export class Project {
   @Column({ nullable: true })
   description: string;
 
-  @OneToMany(() => Board, (board) => board.board)
+  @OneToMany(() => Board, (board) => board.project)
   boards: Board[];
 
   @CreateDateColumn()
