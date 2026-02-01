@@ -28,14 +28,14 @@ export class TasksController {
   }
 
   @Get('by-assignee')
-  findByAssignes(
+  async findByAssignes(
     @Query('assignId') assignIds: string | string[],
   ): Promise<Task[]> {
     const ids = Array.isArray(assignIds)
       ? assignIds.map(Number)
       : [Number(assignIds)];
 
-    return this.tasksService.findByAssignes(ids);
+    return await this.tasksService.findByAssignes(ids);
   }
 
   @Get(':id')
