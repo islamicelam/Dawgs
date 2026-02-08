@@ -10,4 +10,4 @@ import { User } from 'src/users/users.entity';
   controllers: [TasksController],
   providers: [TasksService],
 })
-export class TasksModule { }
+export class TasksModule {}
