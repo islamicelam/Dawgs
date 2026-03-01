@@ -7,7 +7,6 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Injectable()
 export class BoardsService {
-
   constructor(
     @InjectRepository(Board)
     private boardRepo: Repository<Board>,
@@ -31,5 +30,5 @@ export class BoardsService {
   async remove(id: number) {
     const result = await this.boardRepo.delete(id);
     if (result.affected === 0) throw new NotFoundException('Board not found');
-  } 
+  }
 }

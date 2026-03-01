@@ -1,10 +1,12 @@
 import { Project } from 'src/projects/projects.entity';
+import { Task } from 'src/tasks/tasks.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -15,6 +17,9 @@ export class Board {
 
   @Column()
   name: string;
+
+  @OneToMany(() => Task, (task) => task.board)
+  tasks: Task[];
 
   @ManyToOne(() => Project, (project) => project.boards, {
     nullable: false,

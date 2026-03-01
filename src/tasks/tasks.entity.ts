@@ -1,3 +1,4 @@
+import { Board } from 'src/boards/boards.entity';
 import { User } from 'src/users/users.entity';
 import {
   Column,
@@ -21,6 +22,13 @@ export class Task {
 
   @Column({ nullable: true })
   description?: string;
+
+  @ManyToOne(() => Board, (board) => board.tasks, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'boardId' })
+  board?: Board;
 
   @ManyToOne(() => User, (user) => user.tasks, {
     eager: true,
