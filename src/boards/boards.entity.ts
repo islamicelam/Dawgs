@@ -1,4 +1,5 @@
 import { Project } from 'src/projects/projects.entity';
+import { Status } from 'src/statuses/status.entity';
 import { Task } from 'src/tasks/tasks.entity';
 import {
   Column,
@@ -17,6 +18,9 @@ export class Board {
 
   @Column()
   name: string;
+
+  @OneToMany(() => Status, (status) => status.board)
+  statuses: Status[];
 
   @OneToMany(() => Task, (task) => task.board)
   tasks: Task[];

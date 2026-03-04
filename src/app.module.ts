@@ -10,6 +10,7 @@ import { BoardsModule } from './boards/boards.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/roles.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { StatusesModule } from './statuses/statuses.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     AuthModule,
     ProjectsModule,
     BoardsModule,
+    StatusesModule,
   ],
 
   providers: [
