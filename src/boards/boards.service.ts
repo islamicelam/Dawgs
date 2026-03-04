@@ -12,19 +12,30 @@ export class BoardsService {
     private boardRepo: Repository<Board>,
   ) {}
 
-  async create(createBoardDto: CreateBoardDto) {
-    const board = this.boardRepo.create(createBoardDto);
+  async create(
+    projectId: number,
+    createBoardDto: CreateBoardDto,
+  ): Promise<Board> {
+    const board = this.boardRepo.create({
+      ...createBoardDto,
+      project: { id: projectId },
+    });
     return await this.boardRepo.save(board);
   }
 
-  async update(id: number, updateBoardDto: UpdateBoardDto) {
-    return await this.boardRepo.save({ ...updateBoardDto, id });
+  findAll(projectId: number): Promise<Board[]> {
+    return this.boardRepo.findBy({ project: {id: projectId} });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Board> {
     const board = await this.boardRepo.findOneBy({ id });
     if (!board) throw new NotFoundException('Board not found');
     return board;
+  }
+
+  async update(id: number, updateBoardDto: UpdateBoardDto) {
+    const board = await this.findOne(id);
+    return await this.boardRepo.save({ ...updateBoardDto, ...board });
   }
 
   async remove(id: number) {
