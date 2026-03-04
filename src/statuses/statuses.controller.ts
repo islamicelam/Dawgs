@@ -7,28 +7,29 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 export class StatusesController {
   constructor(private readonly statusesService: StatusesService) {}
 
-  @Post()
-  create(@Body() createStatusDto: CreateStatusDto) {
-    return this.statusesService.create(createStatusDto);
+  @Post('/boards/:boardId')
+  create(@Param('boardId') boardId: number, @Body() createStatusDto: CreateStatusDto) {
+    return this.statusesService.create(boardId, createStatusDto)
   }
 
-  @Get()
-  findAll() {
-    return this.statusesService.findAll();
+  @Get('/boards/:boardId')
+  findAll(@Param('boardId') boardId: number) {
+    return this.statusesService.findAll(boardId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.statusesService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.statusesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStatusDto: UpdateStatusDto) {
-    return this.statusesService.update(+id, updateStatusDto);
+  update(@Param('id') id: number, @Body() updateStatusDto: UpdateStatusDto) {
+    return this.statusesService.update(id, updateStatusDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.statusesService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.statusesService.remove(id);
   }
 }
+

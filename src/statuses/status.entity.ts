@@ -10,9 +10,6 @@ export class Status {
     @Column()
     name: string;
 
-    @Column()
-    description: string;
-
     @ManyToOne(() => Board, (board) => board.statuses)
     @JoinColumn({ name: 'boardId' })
     board?: Board;
