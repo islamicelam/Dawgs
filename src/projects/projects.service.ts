@@ -24,6 +24,16 @@ export class ProjectsService {
   }
 
   async update(id: number, updateProjectDto: UpdateProjectDto) {
-    return await this.projectRepo.save({ ...updateProjectDto, id });
+    const project = await this.findOne(id);
+    return await this.projectRepo.save({ ...project, ...updateProjectDto });
+  }
+
+  async findAll() {
+    return await this.projectRepo.find();
+  }
+
+  async remove (id: number) {
+    const result = await this.projectRepo.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Project not found');
   }
 }
