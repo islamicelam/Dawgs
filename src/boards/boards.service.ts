@@ -35,7 +35,7 @@ export class BoardsService {
 
   async update(id: number, updateBoardDto: UpdateBoardDto) {
     const board = await this.findOne(id);
-    return await this.boardRepo.save({ ...updateBoardDto, ...board });
+    return await this.boardRepo.save({ ...board, ...updateBoardDto });
   }
 
   async remove(id: number) {

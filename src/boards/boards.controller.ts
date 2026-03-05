@@ -18,7 +18,7 @@ export class BoardsController {
     return await this.boardsService.findOne(id)
   }
 
-  @Get('projects/:id')
+  @Get('/projects/:id')
   async findAll (@Param('id') id: number): Promise<Board[]> {
     return await this.boardsService.findAll(id);
   }

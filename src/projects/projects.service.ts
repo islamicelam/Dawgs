@@ -13,7 +13,10 @@ export class ProjectsService {
   ) {}
 
   async findOne(id: number) {
-    const project = await this.projectRepo.findOneBy({ id });
+    const project = await this.projectRepo.findOne({ 
+      where: { id },
+      relations: ['boards', 'boards.statuses']
+    })
     if (!project) throw new NotFoundException('Project not found');
     return project;
   }
