@@ -25,7 +25,7 @@ export class TasksController {
 
   @Get()
   getAll(): Promise<Task[]> {
-    return this.tasksService.getAll();
+    return this.tasksService.findAll();
   }
 
   @Get('by-assignee')
