@@ -6,7 +6,7 @@ import { Board } from './boards.entity';
 import { Project } from 'src/projects/projects.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Board, Project])],
+  imports: [TypeOrmModule.forFeature([Board])],
   controllers: [BoardsController],
   providers: [BoardsService],
   exports: [BoardsService],
