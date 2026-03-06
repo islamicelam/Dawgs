@@ -18,29 +18,30 @@ import { CreateTaskDto } from './dto/create-task.dto';
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.tasksService.create(createTaskDto);
+  @Post('/boards/:boardId')
+  create(@Body() createTaskDto: CreateTaskDto, @Param('boardId') boardId: number): Promise<Task> {
+    return this.tasksService.create(createTaskDto, boardId);
   }
 
-  @Get()
-  getAll(): Promise<Task[]> {
-    return this.tasksService.findAll();
+  @Get('/boards/:boardId')
+  getAll(@Param('boardId') boardId: number): Promise<Task[]> {
+    return this.tasksService.findAll(boardId);
   }
 
-  @Get('by-assignee')
+  @Get('/boards/:boardId/assignees')
   async findByAssignes(
+    @Param('boardId') boardId: number,
     @Query('assignId') assignIds: string | string[],
   ): Promise<Task[]> {
     const ids = Array.isArray(assignIds)
       ? assignIds.map(Number)
       : [Number(assignIds)];
 
-    return await this.tasksService.findByAssignes(ids);
+    return await this.tasksService.findByAssignes(ids, boardId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<Task | null> {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Task> {
     return this.tasksService.findOne(id);
   }
 

@@ -7,7 +7,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -33,7 +32,7 @@ export class Task {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'boardId' })
-  board?: Board;
+  board: Board;
 
   @ManyToOne(() => User, (user) => user.tasks, {
     eager: true,
