@@ -19,11 +19,11 @@ export class Task {
   title: string;
 
   @ManyToOne(() => Status, (status) => status.tasks, {
-    nullable: true, 
-    onDelete: 'RESTRICT'
+    nullable: true,
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'statusId' })
-  status?: Status 
+  status?: Status;
 
   @Column({ nullable: true })
   description?: string;

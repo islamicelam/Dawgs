@@ -24,7 +24,7 @@ export class BoardsService {
   }
 
   findAll(projectId: number): Promise<Board[]> {
-    return this.boardRepo.findBy({ project: {id: projectId} });
+    return this.boardRepo.findBy({ project: { id: projectId } });
   }
 
   async findOne(id: number): Promise<Board> {
