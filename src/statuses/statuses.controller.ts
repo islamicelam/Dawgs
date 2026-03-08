@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { StatusesService } from './statuses.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
@@ -9,8 +17,11 @@ export class StatusesController {
   constructor(private readonly statusesService: StatusesService) {}
 
   @Post('/boards/:boardId')
-  create(@Param('boardId') boardId: number, @Body() createStatusDto: CreateStatusDto): Promise<Status> {
-    return this.statusesService.create(boardId, createStatusDto)
+  create(
+    @Param('boardId') boardId: number,
+    @Body() createStatusDto: CreateStatusDto,
+  ): Promise<Status> {
+    return this.statusesService.create(boardId, createStatusDto);
   }
 
   @Get('/boards/:boardId')
@@ -24,7 +35,10 @@ export class StatusesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateStatusDto: UpdateStatusDto): Promise<Status> {
+  update(
+    @Param('id') id: number,
+    @Body() updateStatusDto: UpdateStatusDto,
+  ): Promise<Status> {
     return this.statusesService.update(id, updateStatusDto);
   }
 
@@ -33,4 +47,3 @@ export class StatusesController {
     await this.statusesService.remove(id);
   }
 }
-

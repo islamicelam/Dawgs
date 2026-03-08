@@ -4,4 +4,5 @@ export const STATUS_CATEGORIES = {
   DONE: 'DONE',
 } as const;
 
-export type StatusCategory = (typeof STATUS_CATEGORIES)[keyof typeof STATUS_CATEGORIES];
+export type StatusCategory =
+  (typeof STATUS_CATEGORIES)[keyof typeof STATUS_CATEGORIES];

@@ -12,11 +12,14 @@ export class StatusesService {
     private statusRepository: Repository<Status>,
   ) {}
 
-  async create(boardId: number, createStatusDto: CreateStatusDto): Promise<Status> {
+  async create(
+    boardId: number,
+    createStatusDto: CreateStatusDto,
+  ): Promise<Status> {
     const status = this.statusRepository.create({
-      ...createStatusDto, 
-      board: {id: boardId}
-  });
+      ...createStatusDto,
+      board: { id: boardId },
+    });
     return await this.statusRepository.save(status);
   }
 

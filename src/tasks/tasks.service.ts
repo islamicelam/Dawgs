@@ -13,25 +13,28 @@ export class TasksService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto, boardId: number): Promise<Task> {
-    const task = this.taskRepo.create({ ...createTaskDto, board: {id: boardId} });
+    const task = this.taskRepo.create({
+      ...createTaskDto,
+      board: { id: boardId },
+    });
     return await this.taskRepo.save(task);
   }
 
   findAll(boardId: number): Promise<Task[]> {
-    return this.taskRepo.findBy({board: {id: boardId}});
+    return this.taskRepo.findBy({ board: { id: boardId } });
   }
 
   findByAssignes(assignIds: number[], boardId: number): Promise<Task[]> {
     return this.taskRepo.findBy({
       board: { id: boardId },
-      assign: { id: In(assignIds) }
+      assign: { id: In(assignIds) },
     });
   }
 
   async findOne(id: number): Promise<Task> {
     const task = await this.taskRepo.findOneBy({ id });
-    if (!task) throw new NotFoundException('Task not found')
-    return task
+    if (!task) throw new NotFoundException('Task not found');
+    return task;
   }
 
   async remove(id: number): Promise<void> {
@@ -44,6 +47,6 @@ export class TasksService {
 
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.findOne(id);
-    return await this.taskRepo.save({ ...task ,...updateTaskDto});
+    return await this.taskRepo.save({ ...task, ...updateTaskDto });
   }
 }

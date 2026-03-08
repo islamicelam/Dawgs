@@ -1,29 +1,37 @@
-import { Board } from "src/boards/boards.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { STATUS_CATEGORIES, StatusCategory } from "./status-category";
-import { Task } from "src/tasks/tasks.entity";
+import { Board } from 'src/boards/boards.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { STATUS_CATEGORIES, StatusCategory } from './status-category';
+import { Task } from 'src/tasks/tasks.entity';
 
 @Entity('statuses')
 export class Status {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @ManyToOne(() => Board, (board) => board.statuses)
-    @JoinColumn({ name: 'boardId' })
-    board?: Board;
+  @ManyToOne(() => Board, (board) => board.statuses)
+  @JoinColumn({ name: 'boardId' })
+  board?: Board;
 
-    @Column({
-        type: 'enum',
-        enum: Object.values(STATUS_CATEGORIES),
-    })
-    category: StatusCategory;
+  @Column({
+    type: 'enum',
+    enum: Object.values(STATUS_CATEGORIES),
+  })
+  category: StatusCategory;
 
-    @OneToMany(() => Task, (task) => task.status)
-    tasks: Task[];
+  @OneToMany(() => Task, (task) => task.status)
+  tasks: Task[];
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 }

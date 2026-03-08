@@ -19,7 +19,10 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post('/boards/:boardId')
-  create(@Body() createTaskDto: CreateTaskDto, @Param('boardId') boardId: number): Promise<Task> {
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @Param('boardId') boardId: number,
+  ): Promise<Task> {
     return this.tasksService.create(createTaskDto, boardId);
   }
 
