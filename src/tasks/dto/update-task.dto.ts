@@ -1,21 +1,7 @@
-import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, isNumber, IsOptional, IsString, MinLength } from 'class-validator';
 import { User } from 'src/users/users.entity';
+import { CreateTaskDto } from './create-task.dto';
 
-export class UpdateTaskDto {
-  @IsString()
-  @MinLength(3)
-  @IsOptional()
-  title?: string;
+export class UpdateTaskDto extends PartialType(CreateTaskDto) {}
 
-  @IsString()
-  @MinLength(3)
-  @IsOptional()
-  description?: string;
-
-  @IsOptional()
-  assign?: User;
-
-  @IsBoolean()
-  @IsOptional()
-  isDone?: boolean;
-}

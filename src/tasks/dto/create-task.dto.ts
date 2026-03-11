@@ -1,5 +1,4 @@
 import { IsString, MinLength, IsNumber, IsOptional } from 'class-validator';
-import { User } from 'src/users/users.entity';
 
 export class CreateTaskDto {
   @IsString()
@@ -13,5 +12,9 @@ export class CreateTaskDto {
 
   @IsNumber()
   @IsOptional()
-  assign?: User;
+  assignId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  statusId?: number;
 }

@@ -12,6 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from 'src/auth/public.decorator';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -42,6 +43,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }

@@ -13,9 +13,12 @@ export class TasksService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto, boardId: number): Promise<Task> {
+    const { assignId, statusId, ...rest } = createTaskDto;
     const task = this.taskRepo.create({
-      ...createTaskDto,
+      ...rest, 
       board: { id: boardId },
+      assign: assignId ? { id: assignId } : undefined,
+      status: statusId ? { id: statusId } : undefined, 
     });
     return await this.taskRepo.save(task);
   }
@@ -47,6 +50,12 @@ export class TasksService {
 
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.findOne(id);
-    return await this.taskRepo.save({ ...task, ...updateTaskDto });
+    const { assignId, statusId, ...rest } = updateTaskDto
+    return await this.taskRepo.save({ 
+      ...task, 
+      ...rest,
+      assign: assignId ? { id: assignId } : task.assign,
+      status: statusId ? { id: statusId } : task.status,
+     });
   }
 }
