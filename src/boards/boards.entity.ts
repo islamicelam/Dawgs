@@ -1,5 +1,5 @@
 import { Project } from 'src/projects/projects.entity';
-import { Status } from 'src/statuses/status.entity';
+import { Status } from 'src/statuses/statuses.entity';
 import { Task } from 'src/tasks/tasks.entity';
 import {
   Column,

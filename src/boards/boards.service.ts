@@ -4,12 +4,14 @@ import { Board } from './boards.entity';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { Repository } from 'typeorm';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { StatusesService } from 'src/statuses/statuses.service';
 
 @Injectable()
 export class BoardsService {
   constructor(
     @InjectRepository(Board)
     private boardRepo: Repository<Board>,
+    private statusesService: StatusesService
   ) {}
 
   async create(
@@ -20,7 +22,13 @@ export class BoardsService {
       ...createBoardDto,
       project: { id: projectId },
     });
-    return await this.boardRepo.save(board);
+    const saved = await this.boardRepo.save(board);
+
+    await this.statusesService.create(saved.id, {name: 'To do', category: 'TODO'})
+    await this.statusesService.create(saved.id, {name: 'In Progress', category: 'IN_PROGRESS'})
+    await this.statusesService.create(saved.id, {name: 'Done', category: 'DONE'})
+
+    return saved;
   }
 
   findAll(projectId: number): Promise<Board[]> {

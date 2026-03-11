@@ -10,7 +10,7 @@ import {
 import { StatusesService } from './statuses.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
-import { Status } from './status.entity';
+import { Status } from './statuses.entity';
 
 @Controller('statuses')
 export class StatusesController {

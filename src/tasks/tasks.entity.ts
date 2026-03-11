@@ -1,5 +1,5 @@
 import { Board } from 'src/boards/boards.entity';
-import { Status } from 'src/statuses/status.entity';
+import { Status } from 'src/statuses/statuses.entity';
 import { User } from 'src/users/users.entity';
 import {
   Column,
