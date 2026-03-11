@@ -7,7 +7,6 @@ import {
   Param,
   Post,
   Patch,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './tasks.entity';
