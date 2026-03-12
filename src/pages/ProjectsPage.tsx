@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { createProject, getProjects } from "../api/projects";
+import { useNavigate } from "react-router-dom";
+
 import type { Project } from "../types";
 
 const ProjectsPage = () => {
@@ -8,6 +10,8 @@ const ProjectsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
+
+  const navigate = useNavigate();
 
   const handleCreateProject = async () => {
     await createProject({
@@ -84,8 +88,9 @@ const ProjectsPage = () => {
               <div
                 key={board.id}
                 className="bg-indigo-500 cursor-pointer hover:bg-fuchsia-500 p-2 mt-2 rounded"
+                onClick={() => navigate(`/boards/${board.id}`)}
               >
-                <h3 className="text-gray-400">{board.name}</h3>
+                <h3 className="text-white">{board.name}</h3>
               </div>
             ))}
           </div>
