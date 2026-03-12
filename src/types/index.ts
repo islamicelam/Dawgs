@@ -10,6 +10,7 @@ export interface User {
     name: string;
     description: string;
     createdAt: string;
+    boards: Board[];
   }
   
   export interface Board {
