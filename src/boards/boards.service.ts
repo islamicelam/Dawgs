@@ -11,7 +11,7 @@ export class BoardsService {
   constructor(
     @InjectRepository(Board)
     private boardRepo: Repository<Board>,
-    private statusesService: StatusesService
+    private statusesService: StatusesService,
   ) {}
 
   async create(
@@ -24,9 +24,18 @@ export class BoardsService {
     });
     const saved = await this.boardRepo.save(board);
 
-    await this.statusesService.create(saved.id, {name: 'To do', category: 'TODO'})
-    await this.statusesService.create(saved.id, {name: 'In Progress', category: 'IN_PROGRESS'})
-    await this.statusesService.create(saved.id, {name: 'Done', category: 'DONE'})
+    await this.statusesService.create(saved.id, {
+      name: 'To do',
+      category: 'TODO',
+    });
+    await this.statusesService.create(saved.id, {
+      name: 'In Progress',
+      category: 'IN_PROGRESS',
+    });
+    await this.statusesService.create(saved.id, {
+      name: 'Done',
+      category: 'DONE',
+    });
 
     return saved;
   }
