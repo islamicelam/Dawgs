@@ -19,7 +19,9 @@ export class Status {
   @Column()
   name: string;
 
-  @ManyToOne(() => Board, (board) => board.statuses)
+  @ManyToOne(() => Board, (board) => board.statuses, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'boardId' })
   board?: Board;
 
