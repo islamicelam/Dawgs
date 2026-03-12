@@ -1,7 +1,7 @@
-import './App.css'
-import { Route, Routes } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-import ProjectsPage from './pages/ProjectsPage';
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 function App() {
   return (
@@ -12,4 +12,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

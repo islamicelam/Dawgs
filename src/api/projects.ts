@@ -14,4 +14,4 @@ export const updateProject = (
 ) => api.patch(`/projects/${projectId}`, data);
 
 export const deleteProject = (projectId: number) =>
-    api.delete(`/projects/${projectId}`);
+  api.delete(`/projects/${projectId}`);
