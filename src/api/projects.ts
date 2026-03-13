@@ -9,9 +9,8 @@ export const createProject = (data: { name: string; description?: string }) =>
   api.post(`/projects`, data);
 
 export const updateProject = (
-  projectId: number,
-  data?: { name: string; description?: string },
-) => api.patch(`/projects/${projectId}`, data);
+  id: number,
+  data: { name?: string; description?: string },
+) => api.patch(`/projects/${id}`, data);
 
-export const deleteProject = (projectId: number) =>
-  api.delete(`/projects/${projectId}`);
+export const deleteProject = (id: number) => api.delete(`/projects/${id}`);

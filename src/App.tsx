@@ -1,7 +1,7 @@
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import ProjectsPage from "./pages/ProjectsPage";
+import ProjectsPage from "./pages/ProjectPage";
 import BoardPage from "./pages/BoardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
