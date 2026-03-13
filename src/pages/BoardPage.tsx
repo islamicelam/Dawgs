@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getTasks, createTask, updateTask } from "../api/tasks";
 import { getStatuses, createStatus, updateStatusOrder } from "../api/statuses";
-import { getBoard } from "../api/boards";
+import { deleteBoard, getBoard, updateBoard } from "../api/boards";
 import { getUsers } from "../api/users";
 import type { Task, Status, Board, User } from "../types";
 import {
@@ -24,6 +24,9 @@ import {
 import Header from "../components/Header";
 import SortableColumn from "../components/board/SortableColumn";
 import TaskModal from "../components/board/TaskModal";
+import BoardFormModal from "../components/board/BoardFormModal";
+import ConfirmModal from "../components/common/ConfirmModal";
+import Modal from "../components/common/Modal";
 
 const BoardPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +48,9 @@ const BoardPage = () => {
     null,
   );
   const [newTaskTitle, setNewTaskTitle] = useState("");
+
+  const [isEditBoardOpen, setIsEditBoardOpen] = useState(false);
+  const [isDeleteBoardOpen, setIsDeleteBoardOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -85,6 +91,18 @@ const BoardPage = () => {
     setAddingTaskToStatus(null);
     const res = await getTasks(boardId);
     setTasks(res.data);
+  };
+
+  const handleUpdateBoard = async (name: string) => {
+    await updateBoard(boardId, { name });
+    setIsEditBoardOpen(false);
+    const res = await getBoard(boardId);
+    setBoard(res.data);
+  };
+
+  const handleDeleteBoard = async () => {
+    await deleteBoard(boardId);
+    navigate("/projects");
   };
 
   const handleMoveTask = async (taskId: number, newStatusId: number) => {
@@ -158,6 +176,7 @@ const BoardPage = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
+
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
         <button
           onClick={() => navigate("/projects")}
@@ -165,10 +184,24 @@ const BoardPage = () => {
         >
           ← Projects
         </button>
-        <div className="text-center">
-          <h1 className="text-xl font-semibold text-slate-800">
-            {board?.name}
-          </h1>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-slate-800">
+              {board?.name}
+            </h1>
+            <button
+              onClick={() => setIsEditBoardOpen(true)}
+              className="text-slate-300 hover:text-slate-600 transition-colors"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => setIsDeleteBoardOpen(true)}
+              className="text-slate-300 hover:text-red-500 transition-colors"
+            >
+              🗑️
+            </button>
+          </div>
           <p className="text-sm text-slate-400">
             {statuses.length} columns · {tasks.length} tasks
           </p>
@@ -233,43 +266,57 @@ const BoardPage = () => {
       )}
 
       {isStatusModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 shadow-xl">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4">
-              Add column
-            </h2>
-            <input
-              type="text"
-              placeholder="Column name"
-              value={newStatusName}
-              onChange={(e) => setNewStatusName(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
-            />
-            <select
-              value={newStatusCategory}
-              onChange={(e) => setNewStatusCategory(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none"
+        <Modal onClose={() => setIsStatusModalOpen(false)}>
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">
+            Add column
+          </h2>
+          <input
+            type="text"
+            placeholder="Column name"
+            value={newStatusName}
+            onChange={(e) => setNewStatusName(e.target.value)}
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+          />
+          <select
+            value={newStatusCategory}
+            onChange={(e) => setNewStatusCategory(e.target.value)}
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none"
+          >
+            <option value="TODO">Todo</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCreateStatus}
+              className="flex-1 bg-slate-800 text-white rounded-lg py-2 text-sm hover:bg-slate-700 transition-colors"
             >
-              <option value="TODO">Todo</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="DONE">Done</option>
-            </select>
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreateStatus}
-                className="flex-1 bg-slate-800 text-white rounded-lg py-2 text-sm hover:bg-slate-700 transition-colors"
-              >
-                Create
-              </button>
-              <button
-                onClick={() => setIsStatusModalOpen(false)}
-                className="flex-1 bg-slate-100 text-slate-500 rounded-lg py-2 text-sm hover:bg-slate-200 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+              Create
+            </button>
+            <button
+              onClick={() => setIsStatusModalOpen(false)}
+              className="flex-1 bg-slate-100 text-slate-500 rounded-lg py-2 text-sm hover:bg-slate-200 transition-colors"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
+        </Modal>
+      )}
+
+      {isEditBoardOpen && (
+        <BoardFormModal
+          initialName={board?.name}
+          onSubmit={handleUpdateBoard}
+          onClose={() => setIsEditBoardOpen(false)}
+        />
+      )}
+
+      {isDeleteBoardOpen && (
+        <ConfirmModal
+          message="Are you sure you want to delete this board?"
+          onConfirm={handleDeleteBoard}
+          onCancel={() => setIsDeleteBoardOpen(false)}
+        />
       )}
     </div>
   );
