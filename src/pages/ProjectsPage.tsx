@@ -3,7 +3,7 @@ import { createProject, getProjects } from "../api/projects";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "../types";
 import { createBoard } from "../api/boards";
-import Header from "./Header";
+import Header from "../components/Header";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
