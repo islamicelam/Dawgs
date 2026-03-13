@@ -25,6 +25,9 @@ export class Status {
   @JoinColumn({ name: 'boardId' })
   board?: Board;
 
+  @Column({ default: 0 })
+  order: number;
+
   @Column({
     type: 'enum',
     enum: Object.values(STATUS_CATEGORIES),

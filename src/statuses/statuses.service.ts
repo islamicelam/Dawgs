@@ -24,7 +24,16 @@ export class StatusesService {
   }
 
   findAll(boardId: number): Promise<Status[]> {
-    return this.statusRepository.findBy({ board: { id: boardId } });
+    return this.statusRepository.find({
+      where: { board: { id: boardId } },
+      order: { order: 'ASC' },
+    });
+  }
+
+  async updateOrder(ids: number[]): Promise<void> {
+    await Promise.all(
+      ids.map((id, index) => this.statusRepository.save({ id, order: index })),
+    );
   }
 
   async findOne(id: number): Promise<Status> {

@@ -24,7 +24,10 @@ export class TasksService {
   }
 
   findAll(boardId: number): Promise<Task[]> {
-    return this.taskRepo.findBy({ board: { id: boardId } });
+    return this.taskRepo.find({
+      where: { board: { id: boardId } },
+      relations: ['status', 'assign'],
+    });
   }
 
   findByAssignes(assignIds: number[], boardId: number): Promise<Task[]> {

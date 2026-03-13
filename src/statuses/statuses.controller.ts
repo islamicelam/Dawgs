@@ -34,6 +34,11 @@ export class StatusesController {
     return this.statusesService.findOne(id);
   }
 
+  @Patch('order')
+  updateOrder(@Body() body: { ids: number[] }): Promise<void> {
+    return this.statusesService.updateOrder(body.ids);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: number,
