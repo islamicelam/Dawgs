@@ -5,19 +5,24 @@ import { useNavigate } from "react-router-dom";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    const response = await login(email, password);
-    localStorage.setItem("token", response.data.access_token);
-    navigate("/projects");
+    try {
+      const response = await login(email, password);
+      localStorage.setItem("token", response.data.access_token);
+      navigate("/projects");
+    } catch (error) {
+      setError("Invalid email or password");
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6">Войти</h1>
+        <h1 className="text-2xl font-bold mb-6">Log in</h1>
 
         <input
           type="email"
@@ -41,6 +46,7 @@ const LoginPage = () => {
         >
           Login
         </button>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getTasks, createTask, updateTask } from "../api/tasks";
 import { getStatuses, createStatus, updateStatusOrder } from "../api/statuses";
 import { getBoard } from "../api/boards";
@@ -335,6 +335,8 @@ const BoardPage = () => {
     ? tasks.find((t) => `task-${t.id}` === activeId)
     : null;
 
+  const navigate = useNavigate();
+
   if (loading)
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -347,6 +349,12 @@ const BoardPage = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+        <button
+          onClick={() => navigate("/projects")}
+          className="text-slate-400 hover:text-slate-600 text-sm transition-colors"
+        >
+          ← Projects
+        </button>
         <div>
           <h1 className="text-xl font-semibold text-slate-800">
             {board?.name}
