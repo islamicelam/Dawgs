@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createProject, getProjects } from "../api/projects";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "../types";
+import { createBoard } from "../api/boards";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -9,6 +10,9 @@ const ProjectsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
+
+  const [isAddingBoard, setIsAddingBoard] = useState<number | null>(null);
+  const [newBoardName, setNewBoardName] = useState("");
 
   const navigate = useNavigate();
 
@@ -20,6 +24,14 @@ const ProjectsPage = () => {
     setIsModalOpen(false);
     setNewProjectName("");
     setNewProjectDescription("");
+    const response = await getProjects();
+    setProjects(response.data);
+  };
+
+  const handleCreateBoard = async (projectId: number) => {
+    await createBoard(projectId, { name: newBoardName });
+    setIsAddingBoard(null);
+    setNewBoardName("");
     const response = await getProjects();
     setProjects(response.data);
   };
@@ -40,7 +52,7 @@ const ProjectsPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 w-full">
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -125,6 +137,34 @@ const ProjectsPage = () => {
                   </span>
                 </div>
               ))}
+              {isAddingBoard === project.id ? (
+                <div className="flex gap-2 mt-2">
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Board name..."
+                    value={newBoardName}
+                    onChange={(e) => setNewBoardName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleCreateBoard(project.id)
+                    }
+                    className="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-blue-400"
+                  />
+                  <button
+                    onClick={() => setIsAddingBoard(null)}
+                    className="text-xs text-slate-400"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsAddingBoard(project.id)}
+                  className="w-full text-left text-xs text-slate-300 hover:text-slate-500 mt-2 py-1 transition-colors"
+                >
+                  + Add board
+                </button>
+              )}
             </div>
           </div>
         ))}
