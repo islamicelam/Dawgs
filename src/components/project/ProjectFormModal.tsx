@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Modal from "../common/Modal";
 import type { Project } from "../../types";
 
