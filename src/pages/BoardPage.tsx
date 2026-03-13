@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getTasks, createTask, updateTask } from "../api/tasks";
-import { getStatuses, createStatus } from "../api/statuses";
+import { getStatuses, createStatus, updateStatusOrder } from "../api/statuses";
 import { getBoard } from "../api/boards";
 import type { Task, Status, Board } from "../types";
 import {
@@ -309,7 +309,9 @@ const BoardPage = () => {
     if (activeIdStr.startsWith("col-") && overIdStr.startsWith("col-")) {
       const oldIndex = statuses.findIndex((s) => `col-${s.id}` === activeIdStr);
       const newIndex = statuses.findIndex((s) => `col-${s.id}` === overIdStr);
-      setStatuses(arrayMove(statuses, oldIndex, newIndex));
+      const newStatuses = arrayMove(statuses, oldIndex, newIndex);
+      setStatuses(newStatuses);
+      await updateStatusOrder(newStatuses.map((s) => s.id)); // сохраняем
       return;
     }
 

@@ -10,3 +10,6 @@ export const createStatus = (
 
 export const deleteStatus = (statusId: number) =>
   api.delete(`/statuses/${statusId}`);
+
+export const updateStatusOrder = (ids: number[]) =>
+  api.patch(`/statuses/order`, { ids });
