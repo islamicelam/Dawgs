@@ -23,6 +23,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import Header from "./Header";
 
 const CATEGORY_COLORS: Record<string, string> = {
   TODO: "border-t-slate-400",
@@ -348,6 +349,7 @@ const BoardPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Header />
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
         <button
           onClick={() => navigate("/projects")}

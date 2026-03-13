@@ -3,6 +3,7 @@ import { createProject, getProjects } from "../api/projects";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "../types";
 import { createBoard } from "../api/boards";
+import Header from "./Header";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -53,6 +54,8 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 w-full">
+      <Header />
+
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
