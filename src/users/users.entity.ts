@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserRole } from '../auth/roles';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class User {
@@ -19,6 +20,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column()
   password: string;
 
