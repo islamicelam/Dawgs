@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getTasks, createTask, updateTask } from "../api/tasks";
 import { getStatuses, createStatus, updateStatusOrder } from "../api/statuses";
@@ -56,7 +56,7 @@ const BoardPage = () => {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const [boardRes, statusRes, taskRes, usersRes] = await Promise.all([
       getBoard(boardId),
       getStatuses(boardId),
@@ -68,11 +68,13 @@ const BoardPage = () => {
     setTasks(taskRes.data);
     setUsers(usersRes.data);
     setLoading(false);
-  };
+  }, [boardId]);
 
   useEffect(() => {
-    loadData();
-  }, [boardId]);
+    void (async () => {
+      await loadData();
+    })();
+  }, [loadData]);
 
   const handleCreateStatus = async () => {
     await createStatus(boardId, {
