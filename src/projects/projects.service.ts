@@ -32,7 +32,9 @@ export class ProjectsService {
   }
 
   async findAll() {
-    return await this.projectRepo.find();
+    return await this.projectRepo.find({
+      relations: ['boards'],
+    });
   }
 
   async remove(id: number) {

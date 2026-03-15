@@ -19,9 +19,14 @@ export class Status {
   @Column()
   name: string;
 
-  @ManyToOne(() => Board, (board) => board.statuses)
+  @ManyToOne(() => Board, (board) => board.statuses, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'boardId' })
   board?: Board;
+
+  @Column({ default: 0 })
+  order: number;
 
   @Column({
     type: 'enum',
