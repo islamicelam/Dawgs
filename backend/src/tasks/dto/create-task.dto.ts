@@ -6,7 +6,6 @@ export class CreateTaskDto {
   title: string;
 
   @IsString()
-  @MinLength(3)
   @IsOptional()
   description?: string;
 
