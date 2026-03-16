@@ -1,4 +1,4 @@
-import api from "./axios";
+import api from './axios';
 
 export const getTasks = (boardId: number) =>
   api.get(`/tasks/boards/${boardId}`);
@@ -23,4 +23,4 @@ export const updateTask = (
   },
 ) => api.patch(`/tasks/${taskId}`, data);
 
-export const deleteTask = (taskId: number) => api.delete(`/tasks/${taskId}`);
+export const deleteTask = (id: number) => api.delete(`/tasks/${id}`);

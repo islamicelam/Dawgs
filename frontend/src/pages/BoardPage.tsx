@@ -1,10 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getTasks, createTask, updateTask } from "../api/tasks";
-import { getStatuses, createStatus, updateStatusOrder } from "../api/statuses";
-import { deleteBoard, getBoard, updateBoard } from "../api/boards";
-import { getUsers } from "../api/users";
-import type { Task, Status, Board, User } from "../types";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getTasks, createTask, updateTask } from '../api/tasks';
+import {
+  getStatuses,
+  createStatus,
+  updateStatusOrder,
+  updateStatus,
+  deleteStatus,
+} from '../api/statuses';
+import { deleteBoard, getBoard, updateBoard } from '../api/boards';
+import { getUsers } from '../api/users';
+import type { Task, Status, Board, User } from '../types';
 import {
   DndContext,
   type DragEndEvent,
@@ -15,18 +21,18 @@ import {
   useSensors,
   closestCorners,
   DragOverlay,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
   SortableContext,
   horizontalListSortingStrategy,
   arrayMove,
-} from "@dnd-kit/sortable";
-import Header from "../components/Header";
-import SortableColumn from "../components/board/SortableColumn";
-import TaskModal from "../components/board/TaskModal";
-import BoardFormModal from "../components/board/BoardFormModal";
-import ConfirmModal from "../components/common/ConfirmModal";
-import Modal from "../components/common/Modal";
+} from '@dnd-kit/sortable';
+import Header from '../components/Header';
+import SortableColumn from '../components/board/SortableColumn';
+import TaskModal from '../components/board/TaskModal';
+import BoardFormModal from '../components/board/BoardFormModal';
+import ConfirmModal from '../components/common/ConfirmModal';
+import Modal from '../components/common/Modal';
 
 const BoardPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,12 +48,12 @@ const BoardPage = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [newStatusName, setNewStatusName] = useState("");
-  const [newStatusCategory, setNewStatusCategory] = useState("TODO");
+  const [newStatusName, setNewStatusName] = useState('');
+  const [newStatusCategory, setNewStatusCategory] = useState('TODO');
   const [addingTaskToStatus, setAddingTaskToStatus] = useState<number | null>(
     null,
   );
-  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const [isEditBoardOpen, setIsEditBoardOpen] = useState(false);
   const [isDeleteBoardOpen, setIsDeleteBoardOpen] = useState(false);
@@ -82,14 +88,14 @@ const BoardPage = () => {
       category: newStatusCategory,
     });
     setIsStatusModalOpen(false);
-    setNewStatusName("");
+    setNewStatusName('');
     const res = await getStatuses(boardId);
     setStatuses(res.data);
   };
 
   const handleCreateTask = async (statusId: number) => {
     await createTask(boardId, { title: newTaskTitle, statusId });
-    setNewTaskTitle("");
+    setNewTaskTitle('');
     setAddingTaskToStatus(null);
     const res = await getTasks(boardId);
     setTasks(res.data);
@@ -104,13 +110,29 @@ const BoardPage = () => {
 
   const handleDeleteBoard = async () => {
     await deleteBoard(boardId);
-    navigate("/projects");
+    navigate('/projects');
   };
 
   const handleMoveTask = async (taskId: number, newStatusId: number) => {
     await updateTask(taskId, { statusId: newStatusId });
     const res = await getTasks(boardId);
     setTasks(res.data);
+  };
+
+  const handleEditStatus = async (
+    statusId: number,
+    name: string,
+    category: string,
+  ) => {
+    await updateStatus(statusId, { name, category });
+    const res = await getStatuses(boardId);
+    setStatuses(res.data);
+  };
+
+  const handleDeleteStatus = async (statusId: number) => {
+    await deleteStatus(statusId);
+    const res = await getStatuses(boardId);
+    setStatuses(res.data);
   };
 
   const handleDragStart = (event: DragStartEvent) =>
@@ -121,9 +143,9 @@ const BoardPage = () => {
     if (!over) return;
     const activeIdStr = String(active.id);
     const overIdStr = String(over.id);
-    if (activeIdStr.startsWith("task-") && overIdStr.startsWith("col-")) {
-      const taskId = Number(activeIdStr.replace("task-", ""));
-      const statusId = Number(overIdStr.replace("col-", ""));
+    if (activeIdStr.startsWith('task-') && overIdStr.startsWith('col-')) {
+      const taskId = Number(activeIdStr.replace('task-', ''));
+      const statusId = Number(overIdStr.replace('col-', ''));
       setTasks((prev) =>
         prev.map((t) =>
           t.id === taskId
@@ -141,7 +163,7 @@ const BoardPage = () => {
     const activeIdStr = String(active.id);
     const overIdStr = String(over.id);
 
-    if (activeIdStr.startsWith("col-") && overIdStr.startsWith("col-")) {
+    if (activeIdStr.startsWith('col-') && overIdStr.startsWith('col-')) {
       const oldIndex = statuses.findIndex((s) => `col-${s.id}` === activeIdStr);
       const newIndex = statuses.findIndex((s) => `col-${s.id}` === overIdStr);
       const newStatuses = arrayMove(statuses, oldIndex, newIndex);
@@ -150,19 +172,19 @@ const BoardPage = () => {
       return;
     }
 
-    if (activeIdStr.startsWith("task-")) {
-      const taskId = Number(activeIdStr.replace("task-", ""));
+    if (activeIdStr.startsWith('task-')) {
+      const taskId = Number(activeIdStr.replace('task-', ''));
       let newStatusId: number | null = null;
-      if (overIdStr.startsWith("col-"))
-        newStatusId = Number(overIdStr.replace("col-", ""));
-      else if (overIdStr.startsWith("task-"))
+      if (overIdStr.startsWith('col-'))
+        newStatusId = Number(overIdStr.replace('col-', ''));
+      else if (overIdStr.startsWith('task-'))
         newStatusId =
           tasks.find((t) => `task-${t.id}` === overIdStr)?.status?.id ?? null;
       if (newStatusId) await handleMoveTask(taskId, newStatusId);
     }
   };
 
-  const activeTask = activeId?.startsWith("task-")
+  const activeTask = activeId?.startsWith('task-')
     ? tasks.find((t) => `task-${t.id}` === activeId)
     : null;
 
@@ -181,7 +203,7 @@ const BoardPage = () => {
 
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
         <button
-          onClick={() => navigate("/projects")}
+          onClick={() => navigate('/projects')}
           className="text-slate-400 hover:text-slate-600 text-sm transition-colors"
         >
           ← Projects
@@ -236,6 +258,8 @@ const BoardPage = () => {
                 statuses={statuses}
                 onMove={handleMoveTask}
                 onSelect={setSelectedTask}
+                onEditStatus={handleEditStatus}
+                onDeleteStatus={handleDeleteStatus}
                 addingTaskToStatus={addingTaskToStatus}
                 setAddingTaskToStatus={setAddingTaskToStatus}
                 newTaskTitle={newTaskTitle}
