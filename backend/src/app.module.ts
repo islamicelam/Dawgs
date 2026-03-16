@@ -17,7 +17,7 @@ import { StatusesModule } from './statuses/statuses.module';
     // ENV configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '../.env',
     }),
 
     // Database connection
