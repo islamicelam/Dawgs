@@ -1,9 +1,10 @@
-import "./App.css";
-import { Route, Routes } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import ProjectsPage from "./pages/ProjectPage";
-import BoardPage from "./pages/BoardPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import './App.css';
+import { Route, Routes } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import ProjectsPage from './pages/ProjectPage';
+import BoardPage from './pages/BoardPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -22,6 +23,14 @@ function App() {
         element={
           <ProtectedRoute>
             <BoardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

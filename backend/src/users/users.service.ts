@@ -41,9 +41,20 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     if (updateUserDto.password) {
+      if (!updateUserDto.currentPassword) {
+        throw new BadRequestException('Current password is required');
+      }
+      const user = await this.userRepo.findOneBy({ id });
+      if (!user) throw new NotFoundException('User not found');
+      
+      const isValid = await bcrypt.compare(updateUserDto.currentPassword, user.password);
+      if (!isValid) throw new BadRequestException('Current password is incorrect');
+      
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-    return this.userRepo.save({ ...updateUserDto, id });
+    
+    const { currentPassword, ...rest } = updateUserDto;
+    return this.userRepo.save({ ...rest, id });
   }
 
   async remove(id: number): Promise<void> {

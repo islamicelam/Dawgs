@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  createdAt: string;
 }
 
 export interface Project {
@@ -31,13 +32,5 @@ export interface Task {
   description?: string;
   status?: Status;
   assign?: User;
-  createdAt: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
   createdAt: string;
 }
