@@ -203,24 +203,6 @@ const BoardPage = () => {
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <div className="px-8 pt-4 flex items-center gap-3">
-        <span className="text-sm text-slate-500">Filter by:</span>
-        <select
-          value={filterAssignId}
-          onChange={(e) =>
-            setFilterAssignId(e.target.value ? Number(e.target.value) : '')
-          }
-          className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-        >
-          <option value="">All assignees</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
         <button
           onClick={() => navigate('/projects')}
@@ -256,6 +238,24 @@ const BoardPage = () => {
         >
           + Add column
         </button>
+      </div>
+
+      <div className="px-8 pt-4 flex items-center gap-3">
+        <span className="text-sm text-slate-500">Filter by:</span>
+        <select
+          value={filterAssignId}
+          onChange={(e) =>
+            setFilterAssignId(e.target.value ? Number(e.target.value) : '')
+          }
+          className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+        >
+          <option value="">All assignees</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <DndContext
