@@ -1,5 +1,5 @@
 import './App.css';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectPage';
 import BoardPage from './pages/BoardPage';
@@ -10,30 +10,15 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/projects"
-        element={
-          <ProtectedRoute>
-            <ProjectsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/boards/:id"
-        element={
-          <ProtectedRoute>
-            <BoardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/boards/:id" element={<BoardPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+      <Route path="/" element={<Navigate to="/projects" />} />
+      <Route path="*" element={
+        localStorage.getItem('token') ? <Navigate to="/projects" /> : <Navigate to="/login" />
+      } />
     </Routes>
   );
 }
