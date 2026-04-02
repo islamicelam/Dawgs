@@ -10,6 +10,9 @@ export const createTask = (
     description?: string;
     statusId?: number;
     assignId?: number;
+    type?: 'TASK' | 'USER_STORY' | 'EPIC';
+    linkedTaskIds?: number[];
+    subtasks?: { id: string; text: string; done: boolean }[];
   },
 ) => api.post(`/tasks/boards/${boardId}`, data);
 
@@ -20,7 +23,16 @@ export const updateTask = (
     description?: string;
     statusId?: number;
     assignId?: number;
+    type?: 'TASK' | 'USER_STORY' | 'EPIC';
+    linkedTaskIds?: number[];
+    subtasks?: { id: string; text: string; done: boolean }[];
   },
 ) => api.patch(`/tasks/${taskId}`, data);
 
 export const deleteTask = (id: number) => api.delete(`/tasks/${id}`);
+
+export const reorderTasks = (taskIds: number[]) =>
+  api.patch('/tasks/reorder', { taskIds });
+
+export const addTaskComment = (id: number, text: string) =>
+  api.post(`/tasks/${id}/comments`, { text });

@@ -6,12 +6,16 @@ const ProjectCard = ({
   project,
   onEdit,
   onDelete,
+  canDelete,
   onAddBoard,
+  onManageShare,
 }: {
   project: Project;
   onEdit: (project: Project) => void;
   onDelete: (id: number) => void;
+  canDelete: boolean;
   onAddBoard: (projectId: number, name: string) => void;
+  onManageShare: (project: Project) => void;
 }) => {
   const navigate = useNavigate();
   const [isAddingBoard, setIsAddingBoard] = useState(false);
@@ -39,11 +43,20 @@ const ProjectCard = ({
             ✏️
           </button>
           <button
+            onClick={() => onManageShare(project)}
+            className="text-slate-300 hover:text-violet-600 text-sm px-1 transition-colors"
+            title="Share project"
+          >
+            👥
+          </button>
+          {canDelete && (
+            <button
             onClick={() => onDelete(project.id)}
             className="text-slate-300 hover:text-red-500 text-sm px-1 transition-colors"
           >
             🗑️
           </button>
+          )}
         </div>
       </div>
 

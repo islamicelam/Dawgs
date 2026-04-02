@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getTasks, createTask, updateTask } from '../api/tasks';
+import { getTasks, createTask, reorderTasks, updateTask } from '../api/tasks';
 import {
   getStatuses,
   createStatus,
@@ -45,7 +45,7 @@ const BoardPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [newStatusName, setNewStatusName] = useState('');
@@ -59,6 +59,8 @@ const BoardPage = () => {
   const [isDeleteBoardOpen, setIsDeleteBoardOpen] = useState(false);
 
   const [filterAssignId, setFilterAssignId] = useState<number | ''>('');
+  const me = JSON.parse(localStorage.getItem('me') ?? 'null') as User | null;
+  const canDelete = me?.role === 'ADMIN';
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -179,15 +181,37 @@ const BoardPage = () => {
       let newStatusId: number | null = null;
       if (overIdStr.startsWith('col-'))
         newStatusId = Number(overIdStr.replace('col-', ''));
-      else if (overIdStr.startsWith('task-'))
-        newStatusId =
-          tasks.find((t) => `task-${t.id}` === overIdStr)?.status?.id ?? null;
+      else if (overIdStr.startsWith('task-')) {
+        const overTask = tasks.find((t) => `task-${t.id}` === overIdStr);
+        newStatusId = overTask?.status?.id ?? null;
+        if (
+          overTask &&
+          overTask.status?.id === tasks.find((t) => t.id === taskId)?.status?.id
+        ) {
+          const statusTasks = tasks
+            .filter((t) => t.status?.id === overTask.status?.id)
+            .sort((a, b) => a.order - b.order);
+          const oldIndex = statusTasks.findIndex((t) => t.id === taskId);
+          const newIndex = statusTasks.findIndex((t) => t.id === overTask.id);
+          const moved = arrayMove(statusTasks, oldIndex, newIndex);
+          const updated = tasks.map((task) => {
+            const idx = moved.findIndex((t) => t.id === task.id);
+            return idx === -1 ? task : { ...task, order: idx };
+          });
+          setTasks(updated);
+          await reorderTasks(moved.map((t) => t.id));
+          return;
+        }
+      }
       if (newStatusId) await handleMoveTask(taskId, newStatusId);
     }
   };
 
   const activeTask = activeId?.startsWith('task-')
     ? tasks.find((t) => `task-${t.id}` === activeId)
+    : null;
+  const selectedTask = selectedTaskId
+    ? tasks.find((t) => t.id === selectedTaskId) ?? null
     : null;
 
   if (loading)
@@ -200,10 +224,10 @@ const BoardPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-amber-50">
       <Header />
 
-      <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+      <div className="bg-white/80 backdrop-blur border-b border-violet-100 px-8 py-4 flex items-center justify-between">
         <button
           onClick={() => navigate('/projects')}
           className="text-slate-400 hover:text-slate-600 text-sm transition-colors"
@@ -221,12 +245,14 @@ const BoardPage = () => {
             >
               ✏️
             </button>
-            <button
+            {canDelete && (
+              <button
               onClick={() => setIsDeleteBoardOpen(true)}
               className="text-slate-300 hover:text-red-500 transition-colors"
             >
               🗑️
             </button>
+            )}
           </div>
           <p className="text-sm text-slate-400">
             {statuses.length} columns · {tasks.length} tasks
@@ -240,7 +266,7 @@ const BoardPage = () => {
         </button>
       </div>
 
-      <div className="px-8 pt-4 flex items-center gap-3">
+      <div className="px-4 lg:px-6 pt-4 flex items-center gap-3">
         <span className="text-sm text-slate-500">Filter by:</span>
         <select
           value={filterAssignId}
@@ -269,20 +295,21 @@ const BoardPage = () => {
           items={statuses.map((s) => `col-${s.id}`)}
           strategy={horizontalListSortingStrategy}
         >
-          <div className="p-8 flex gap-5 overflow-x-auto">
+          <div className="p-4 lg:p-6 flex gap-5 overflow-x-auto">
             {statuses.map((status) => (
               <SortableColumn
                 key={status.id}
                 status={status}
                 tasks={tasks
                   .filter((t) => t.status?.id === status.id)
+                  .sort((a, b) => a.order - b.order)
                   .filter(
                     (t) =>
                       filterAssignId === '' || t.assign?.id === filterAssignId,
                   )}
                 statuses={statuses}
                 onMove={handleMoveTask}
-                onSelect={setSelectedTask}
+                onSelect={(task) => setSelectedTaskId(task.id)}
                 onEditStatus={handleEditStatus}
                 onDeleteStatus={handleDeleteStatus}
                 addingTaskToStatus={addingTaskToStatus}
@@ -309,9 +336,11 @@ const BoardPage = () => {
       {selectedTask && (
         <TaskModal
           task={selectedTask}
+          allTasks={tasks}
           statuses={statuses}
           users={users}
-          onClose={() => setSelectedTask(null)}
+          canDelete={canDelete}
+          onClose={() => setSelectedTaskId(null)}
           onUpdate={loadData}
         />
       )}
@@ -362,7 +391,7 @@ const BoardPage = () => {
         />
       )}
 
-      {isDeleteBoardOpen && (
+      {isDeleteBoardOpen && canDelete && (
         <ConfirmModal
           message="Are you sure you want to delete this board?"
           onConfirm={handleDeleteBoard}

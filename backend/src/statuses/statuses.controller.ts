@@ -11,6 +11,7 @@ import { StatusesService } from './statuses.service';
 import { CreateStatusDto } from './dto/create-status.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { Status } from './statuses.entity';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('statuses')
 export class StatusesController {
@@ -48,6 +49,7 @@ export class StatusesController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   async remove(@Param('id') id: number): Promise<void> {
     await this.statusesService.remove(id);
   }

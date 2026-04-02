@@ -14,3 +14,9 @@ export const updateProject = (
 ) => api.patch(`/projects/${id}`, data);
 
 export const deleteProject = (id: number) => api.delete(`/projects/${id}`);
+
+export const shareProject = (id: number, userId: number) =>
+  api.post(`/projects/${id}/share`, { userId });
+
+export const unshareProject = (id: number, userId: number) =>
+  api.delete(`/projects/${id}/share/${userId}`);

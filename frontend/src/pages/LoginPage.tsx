@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { login, register } from '../api/auth';
+import { getMe, login, register } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
@@ -24,6 +24,9 @@ const LoginPage = () => {
         await register(name, email, password);
         const response = await login(email, password);
         localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+        const me = await getMe();
+        localStorage.setItem('me', JSON.stringify(me.data));
         navigate('/projects');
       } catch {
         setError('Registration failed');
@@ -32,6 +35,9 @@ const LoginPage = () => {
       try {
         const response = await login(email, password);
         localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+        const me = await getMe();
+        localStorage.setItem('me', JSON.stringify(me.data));
         navigate('/projects');
       } catch {
         setError('Invalid email or password');

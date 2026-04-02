@@ -10,6 +10,31 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+export type TaskType = 'TASK' | 'USER_STORY' | 'EPIC';
+
+export interface TaskComment {
+  id: string;
+  text: string;
+  createdAt: string;
+  createdById: number;
+  createdByName: string;
+  mentions: string[];
+}
+
+export interface TaskHistoryEntry {
+  id: string;
+  action: string;
+  createdAt: string;
+  createdById: number;
+  createdByName: string;
+}
+
+export interface TaskSubtask {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
 @Entity('tasks')
 export class Task {
   @PrimaryGeneratedColumn()
@@ -27,6 +52,27 @@ export class Task {
 
   @Column({ nullable: true })
   description?: string;
+
+  @Column({ type: 'int', default: 0 })
+  order: number;
+
+  @Column({ type: 'varchar', default: 'TASK' })
+  type: TaskType;
+
+  @Column({ type: 'jsonb', default: [] })
+  comments: TaskComment[];
+
+  @Column({ type: 'jsonb', default: [] })
+  history: TaskHistoryEntry[];
+
+  @Column({ type: 'jsonb', default: [] })
+  subtasks: TaskSubtask[];
+
+  @Column({ type: 'jsonb', default: [] })
+  linkedTaskIds: number[];
+
+  @Column({ type: 'jsonb', default: [] })
+  descriptionMentions: string[];
 
   @ManyToOne(() => Board, (board) => board.tasks, {
     onDelete: 'RESTRICT',

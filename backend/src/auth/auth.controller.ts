@@ -13,6 +13,12 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
+  @Post('refresh')
+  refresh(@Body() body: { refresh_token: string }) {
+    return this.authService.refresh(body.refresh_token);
+  }
+
   @Get('me')
   me(@Request() req) {
     return req.user;

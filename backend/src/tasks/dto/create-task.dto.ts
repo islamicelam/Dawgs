@@ -16,4 +16,14 @@ export class CreateTaskDto {
   @IsOptional()
   @IsNumber()
   statusId?: number;
+
+  @IsOptional()
+  @IsString()
+  type?: 'TASK' | 'USER_STORY' | 'EPIC';
+
+  @IsOptional()
+  linkedTaskIds?: number[];
+
+  @IsOptional()
+  subtasks?: { id: string; text: string; done: boolean }[];
 }

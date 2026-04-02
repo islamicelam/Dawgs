@@ -12,6 +12,7 @@ export interface Project {
   description: string;
   createdAt: string;
   boards: Board[];
+  members?: User[];
 }
 
 export interface Board {
@@ -30,6 +31,26 @@ export interface Task {
   id: number;
   title: string;
   description?: string;
+  order: number;
+  type: 'TASK' | 'USER_STORY' | 'EPIC';
+  comments: {
+    id: string;
+    text: string;
+    createdAt: string;
+    createdById: number;
+    createdByName: string;
+    mentions: string[];
+  }[];
+  history: {
+    id: string;
+    action: string;
+    createdAt: string;
+    createdById: number;
+    createdByName: string;
+  }[];
+  subtasks: { id: string; text: string; done: boolean }[];
+  linkedTaskIds: number[];
+  descriptionMentions: string[];
   status?: Status;
   assign?: User;
   createdAt: string;
