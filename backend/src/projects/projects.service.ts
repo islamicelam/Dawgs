@@ -25,7 +25,10 @@ export class ProjectsService {
       relations: ['boards', 'boards.statuses', 'members'],
     });
     if (!project) throw new NotFoundException('Project not found');
-    if (!this.isAdmin(user) && !project.members.some((member) => member.id === user.id)) {
+    if (
+      !this.isAdmin(user) &&
+      !project.members.some((member) => member.id === user.id)
+    ) {
       throw new NotFoundException('Project not found');
     }
     return project;
@@ -48,6 +51,7 @@ export class ProjectsService {
     if (this.isAdmin(user)) {
       return await this.projectRepo.find({
         relations: ['boards', 'members'],
+        order: { createdAt: 'ASC' },
       });
     }
     return await this.projectRepo
