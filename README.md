@@ -21,7 +21,7 @@ A Trello-like project management application built with NestJS + React.
 - **Projects & Boards** — Create projects, organize them into boards
 - **Kanban Board** — Drag and drop tasks between columns (statuses)
 - **Task Sorting** — Reorder tasks within a single column
-- **Statuses** — Custom statuses per board with categories: `TODO`, `IN_PROGRESS`, `DONE`
+- **Statuses** — Each board gets 3 default statuses automatically: `TODO`, `IN_PROGRESS`, `DONE`. You can also create custom statuses per board
 
 ### Tasks
 
@@ -78,6 +78,7 @@ DB_HOST=db
 DB_PORT=5432
 APP_PORT=3001
 JWT_SECRET=yourjwtsecret
+JWT_REFRESH_SECRET=yourrefreshsecret
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=yourpassword
 POSTGRES_DB=dawgs
