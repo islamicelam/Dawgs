@@ -26,4 +26,12 @@ export class CreateTaskDto {
 
   @IsOptional()
   subtasks?: { id: string; text: string; done: boolean }[];
+
+  @IsOptional()
+  @IsNumber()
+  parentEpicId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  parentStoryId?: number;
 }

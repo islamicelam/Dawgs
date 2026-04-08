@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Task } from './tasks.entity';
@@ -18,7 +22,11 @@ export class TasksService {
 
   private getMentions(text?: string): string[] {
     if (!text) return [];
-    return [...new Set((text.match(/@([a-zA-Z0-9._-]+)/g) ?? []).map((m) => m.slice(1)))];
+    return [
+      ...new Set(
+        (text.match(/@([a-zA-Z0-9._-]+)/g) ?? []).map((m) => m.slice(1)),
+      ),
+    ];
   }
 
   private history(action: string, user: User) {
@@ -49,9 +57,36 @@ export class TasksService {
     }
   }
 
-  async create(createTaskDto: CreateTaskDto, boardId: number, user: User): Promise<Task> {
+  async create(
+    createTaskDto: CreateTaskDto,
+    boardId: number,
+    user: User,
+  ): Promise<Task> {
     await this.ensureBoardAccess(boardId, user);
-    const { assignId, statusId, description, linkedTaskIds, subtasks, ...rest } = createTaskDto;
+
+    const {
+      assignId,
+      statusId,
+      description,
+      linkedTaskIds,
+      subtasks,
+      parentEpicId,
+      parentStoryId,
+      ...rest
+    } = createTaskDto;
+
+    if (rest.type === 'EPIC' && (parentEpicId || parentStoryId)) {
+      throw new BadRequestException('Epic cannot have a parent');
+    }
+    if (rest.type === 'USER_STORY' && parentStoryId) {
+      throw new BadRequestException('User Story cannot have a parent Story');
+    }
+    if (rest.type === 'TASK' && parentEpicId && parentStoryId) {
+      throw new BadRequestException(
+        'Task cannot have both a parent Epic and a parent Story',
+      );
+    }
+
     const max = await this.taskRepo
       .createQueryBuilder('task')
       .where('task.boardId = :boardId', { boardId })
@@ -71,6 +106,8 @@ export class TasksService {
       comments: [],
       history: [this.history('Task created', user)],
       descriptionMentions: this.getMentions(description),
+      parentEpic: parentEpicId ? { id: parentEpicId } : undefined,
+      parentStory: parentStoryId ? { id: parentStoryId } : undefined,
     });
     return await this.taskRepo.save(task);
   }
@@ -84,7 +121,11 @@ export class TasksService {
     });
   }
 
-  async findByAssignes(assignIds: number[], boardId: number, user: User): Promise<Task[]> {
+  async findByAssignes(
+    assignIds: number[],
+    boardId: number,
+    user: User,
+  ): Promise<Task[]> {
     await this.ensureBoardAccess(boardId, user);
     return this.taskRepo.findBy({
       board: { id: boardId },
@@ -95,11 +136,20 @@ export class TasksService {
   async findOne(id: number, user?: User): Promise<Task> {
     const task = await this.taskRepo.findOne({
       where: { id },
-      relations: ['status', 'assign', 'board', 'board.project'],
+      relations: [
+        'status',
+        'assign',
+        'board',
+        'board.project',
+        'parentEpic',
+        'parentStory',
+      ],
     });
     if (!task) throw new NotFoundException('Task not found');
     if (user && user.role !== 'ADMIN') {
-      const hasAccess = task.board.project.members?.some((member) => member.id === user.id);
+      const hasAccess = task.board.project.members?.some(
+        (member) => member.id === user.id,
+      );
       if (!hasAccess) throw new NotFoundException('Task not found');
     }
     return task;
@@ -114,10 +164,40 @@ export class TasksService {
     }
   }
 
-  async update(id: number, updateTaskDto: UpdateTaskDto, user: User): Promise<Task> {
+  async update(
+    id: number,
+    updateTaskDto: UpdateTaskDto,
+    user: User,
+  ): Promise<Task> {
     const task = await this.findOne(id, user);
-    const { assignId, statusId, description, linkedTaskIds, subtasks, ...rest } = updateTaskDto;
-    const nextHistory = [...(task.history ?? []), this.history('Task updated', user)];
+
+    const {
+      assignId,
+      statusId,
+      description,
+      linkedTaskIds,
+      subtasks,
+      parentEpicId,
+      parentStoryId,
+      ...rest
+    } = updateTaskDto;
+
+    if (rest.type === 'EPIC' && (parentEpicId || parentStoryId)) {
+      throw new BadRequestException('Epic cannot have a parent');
+    }
+    if (rest.type === 'USER_STORY' && parentStoryId) {
+      throw new BadRequestException('User Story cannot have a parent Story');
+    }
+    if (rest.type === 'TASK' && parentEpicId && parentStoryId) {
+      throw new BadRequestException(
+        'Task cannot have both a parent Epic and a parent Story',
+      );
+    }
+
+    const nextHistory = [
+      ...(task.history ?? []),
+      this.history('Task updated', user),
+    ];
     return await this.taskRepo.save({
       ...task,
       ...rest,
@@ -128,6 +208,8 @@ export class TasksService {
       subtasks: subtasks ?? task.subtasks,
       history: nextHistory,
       descriptionMentions: this.getMentions(description ?? task.description),
+      parentEpic: parentEpicId ? { id: parentEpicId } : task.parentEpic,
+      parentStory: parentStoryId ? { id: parentStoryId } : task.parentStory,
     });
   }
 
@@ -142,7 +224,10 @@ export class TasksService {
       const task = map.get(id);
       if (!task) return;
       task.order = idx;
-      task.history = [...(task.history ?? []), this.history('Task reordered', user)];
+      task.history = [
+        ...(task.history ?? []),
+        this.history('Task reordered', user),
+      ];
       toSave.push(task);
     });
     if (toSave.length > 0) await this.taskRepo.save(toSave);
@@ -162,7 +247,10 @@ export class TasksService {
       },
     ];
     task.comments = comments;
-    task.history = [...(task.history ?? []), this.history('Comment added', user)];
+    task.history = [
+      ...(task.history ?? []),
+      this.history('Comment added', user),
+    ];
     return this.taskRepo.save(task);
   }
 }

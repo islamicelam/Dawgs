@@ -71,6 +71,14 @@ export class Task {
   @Column({ type: 'jsonb', default: [] })
   linkedTaskIds: number[];
 
+  @ManyToOne(() => Task, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'parentEpicId' })
+  parentEpic?: Task;
+
+  @ManyToOne(() => Task, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'parentStoryId' })
+  parentStory?: Task;
+
   @Column({ type: 'jsonb', default: [] })
   descriptionMentions: string[];
 
