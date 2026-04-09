@@ -54,4 +54,6 @@ export interface Task {
   status?: Status;
   assign?: User;
   createdAt: string;
+  parentEpic?: Task;
+  parentStory?: Task;
 }

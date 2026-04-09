@@ -1,6 +1,6 @@
-import type { Task, Status } from "../../types";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import type { Task, Status } from '../../types';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const SortableTask = ({
   task,
@@ -22,10 +22,17 @@ const SortableTask = ({
     isDragging,
   } = useSortable({ id: `task-${task.id}` });
 
+  const typeColor = {
+    EPIC: '#8b5cf6',
+    USER_STORY: '#3b82f6',
+    TASK: '#94a3b8',
+  };
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
+    borderLeft: `3px solid ${typeColor[task.type ?? 'TASK']}`,
   };
 
   return (
@@ -39,10 +46,22 @@ const SortableTask = ({
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm text-slate-700 font-medium">{task.title}</p>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
-          {task.type === 'USER_STORY' ? 'Story' : task.type === 'EPIC' ? 'Epic' : 'Task'}
-        </span>
+        {/* <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+          {task.type === 'USER_STORY'
+            ? 'Story'
+            : task.type === 'EPIC'
+              ? 'Epic'
+              : 'Task'}
+        </span> */}
       </div>
+      {(task.parentEpic || task.parentStory) && (
+        <p className="text-[11px] text-slate-400 mt-0.5">
+          ↑{' '}
+          {task.parentEpic
+            ? `Epic: #${task.parentEpic.id} ${task.parentEpic.title}`
+            : `Story: #${task.parentStory!.id} ${task.parentStory!.title}`}
+        </p>
+      )}
       {task.description && (
         <p className="text-xs text-slate-400 mt-1 line-clamp-2">
           {task.description}
@@ -53,7 +72,8 @@ const SortableTask = ({
       )}
       {!!task.subtasks?.length && (
         <p className="text-xs text-emerald-600 mt-1">
-          {task.subtasks.filter((sub) => sub.done).length}/{task.subtasks.length} subtasks
+          {task.subtasks.filter((sub) => sub.done).length}/
+          {task.subtasks.length} subtasks
         </p>
       )}
       <div className="mt-2 hidden group-hover:flex gap-1 flex-wrap">

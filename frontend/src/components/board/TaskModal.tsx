@@ -24,15 +24,27 @@ const TaskModal = ({
   const [description, setDescription] = useState(task.description ?? '');
   const [assignId, setAssignId] = useState<number | ''>(task.assign?.id ?? '');
   const [statusId, setStatusId] = useState<number | ''>(task.status?.id ?? '');
-  const [type, setType] = useState<'TASK' | 'USER_STORY' | 'EPIC'>(task.type ?? 'TASK');
+  const [type, setType] = useState<'TASK' | 'USER_STORY' | 'EPIC'>(
+    task.type ?? 'TASK',
+  );
   const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
   const [newSubtask, setNewSubtask] = useState('');
   const [comment, setComment] = useState('');
-  const [linkedTaskIds, setLinkedTaskIds] = useState<number[]>(task.linkedTaskIds ?? []);
+  const [linkedTaskIds, setLinkedTaskIds] = useState<number[]>(
+    task.linkedTaskIds ?? [],
+  );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [parentEpicId, setParentEpicId] = useState<number | ''>(
+    task.parentEpic?.id ?? '',
+  );
+  const [parentStoryId, setParentStoryId] = useState<number | ''>(
+    task.parentStory?.id ?? '',
+  );
+
   const appendMention = (name: string, target: 'description' | 'comment') => {
     const token = `@${name}`;
-    if (target === 'description') setDescription((prev) => `${prev} ${token}`.trim());
+    if (target === 'description')
+      setDescription((prev) => `${prev} ${token}`.trim());
     else setComment((prev) => `${prev} ${token}`.trim());
   };
 
@@ -45,6 +57,8 @@ const TaskModal = ({
       type,
       subtasks,
       linkedTaskIds,
+      parentEpicId: parentEpicId !== '' ? parentEpicId : null,
+      parentStoryId: parentStoryId !== '' ? parentStoryId : null,
     });
     onUpdate();
     onClose();
@@ -58,7 +72,10 @@ const TaskModal = ({
 
   const handleAddSubtask = () => {
     if (!newSubtask.trim()) return;
-    setSubtasks((prev) => [...prev, { id: crypto.randomUUID(), text: newSubtask.trim(), done: false }]);
+    setSubtasks((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), text: newSubtask.trim(), done: false },
+    ]);
     setNewSubtask('');
   };
 
@@ -114,7 +131,9 @@ const TaskModal = ({
               <label className="text-xs text-slate-500 mb-1 block">Type</label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as 'TASK' | 'USER_STORY' | 'EPIC')}
+                onChange={(e) =>
+                  setType(e.target.value as 'TASK' | 'USER_STORY' | 'EPIC')
+                }
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
               >
                 <option value="TASK">Task</option>
@@ -122,6 +141,58 @@ const TaskModal = ({
                 <option value="EPIC">Epic</option>
               </select>
             </div>
+            {type !== 'EPIC' && (
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Parent Epic
+                </label>
+                <select
+                  value={parentEpicId}
+                  onChange={(e) =>
+                    setParentEpicId(
+                      e.target.value ? Number(e.target.value) : '',
+                    )
+                  }
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                >
+                  <option value="">No Epic</option>
+                  {allTasks
+                    .filter((t) => t.type === 'EPIC' && t.id !== task.id)
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>
+                        #{t.id} {t.title}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            {type === 'TASK' && (
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Parent Story
+                </label>
+                <select
+                  value={parentStoryId}
+                  onChange={(e) => {
+                    setParentStoryId(
+                      e.target.value ? Number(e.target.value) : '',
+                    );
+                    if (e.target.value) setParentEpicId(''); // mutual exclusivity
+                  }}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                >
+                  <option value="">No Story</option>
+                  {allTasks
+                    .filter((t) => t.type === 'USER_STORY' && t.id !== task.id)
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>
+                        #{t.id} {t.title}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="text-xs text-slate-500 mb-1 block">
@@ -147,13 +218,17 @@ const TaskModal = ({
               )}
             </div>
             <div>
-              <label className="text-xs text-slate-500 mb-1 block">Linked tasks</label>
+              <label className="text-xs text-slate-500 mb-1 block">
+                Linked tasks
+              </label>
               <select
                 multiple
                 value={linkedTaskIds.map(String)}
                 onChange={(e) =>
                   setLinkedTaskIds(
-                    Array.from(e.target.selectedOptions).map((option) => Number(option.value)),
+                    Array.from(e.target.selectedOptions).map((option) =>
+                      Number(option.value),
+                    ),
                   )
                 }
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 min-h-24"
@@ -168,17 +243,24 @@ const TaskModal = ({
               </select>
             </div>
             <div>
-              <label className="text-xs text-slate-500 mb-2 block">Subtasks</label>
+              <label className="text-xs text-slate-500 mb-2 block">
+                Subtasks
+              </label>
               <div className="space-y-2">
                 {subtasks.map((subtask) => (
-                  <label key={subtask.id} className="flex items-center gap-2 text-sm text-slate-700">
+                  <label
+                    key={subtask.id}
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
                     <input
                       type="checkbox"
                       checked={subtask.done}
                       onChange={() =>
                         setSubtasks((prev) =>
                           prev.map((item) =>
-                            item.id === subtask.id ? { ...item, done: !item.done } : item,
+                            item.id === subtask.id
+                              ? { ...item, done: !item.done }
+                              : item,
                           ),
                         )
                       }
@@ -193,7 +275,10 @@ const TaskModal = ({
                     placeholder="Add subtask..."
                     className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
                   />
-                  <button onClick={handleAddSubtask} className="px-3 rounded-lg bg-slate-100 text-sm">
+                  <button
+                    onClick={handleAddSubtask}
+                    className="px-3 rounded-lg bg-slate-100 text-sm"
+                  >
                     Add
                   </button>
                 </div>
@@ -201,16 +286,26 @@ const TaskModal = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-500 mb-2 block">Comments</label>
+                <label className="text-xs text-slate-500 mb-2 block">
+                  Comments
+                </label>
                 <div className="max-h-40 overflow-y-auto space-y-2 mb-2">
                   {(task.comments ?? []).map((item) => (
-                    <div key={item.id} className="bg-slate-50 rounded-lg p-2 text-xs">
-                      <div className="font-semibold text-slate-700">{item.createdByName}</div>
+                    <div
+                      key={item.id}
+                      className="bg-slate-50 rounded-lg p-2 text-xs"
+                    >
+                      <div className="font-semibold text-slate-700">
+                        {item.createdByName}
+                      </div>
                       <div className="text-slate-600">{item.text}</div>
                       {!!item.mentions?.length && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {item.mentions.map((mention) => (
-                            <span key={mention} className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+                            <span
+                              key={mention}
+                              className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700"
+                            >
                               @{mention}
                             </span>
                           ))}
@@ -238,18 +333,32 @@ const TaskModal = ({
                     </button>
                   ))}
                 </div>
-                <button onClick={handleAddComment} className="mt-2 px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs">
+                <button
+                  onClick={handleAddComment}
+                  className="mt-2 px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs"
+                >
                   Add comment
                 </button>
               </div>
               <div>
-                <label className="text-xs text-slate-500 mb-2 block">Task history</label>
+                <label className="text-xs text-slate-500 mb-2 block">
+                  Task history
+                </label>
                 <div className="max-h-56 overflow-y-auto space-y-2">
-                  {(task.history ?? []).slice().reverse().map((item) => (
-                    <div key={item.id} className="bg-slate-50 rounded-lg p-2 text-xs text-slate-600">
-                      <span className="font-medium text-slate-700">{item.createdByName}</span> {item.action}
-                    </div>
-                  ))}
+                  {(task.history ?? [])
+                    .slice()
+                    .reverse()
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className="bg-slate-50 rounded-lg p-2 text-xs text-slate-600"
+                      >
+                        <span className="font-medium text-slate-700">
+                          {item.createdByName}
+                        </span>{' '}
+                        {item.action}
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -310,11 +419,11 @@ const TaskModal = ({
               </div>
               {canDelete && (
                 <button
-                onClick={() => setIsDeleteOpen(true)}
-                className="w-full bg-red-50 text-red-500 border border-red-200 rounded-lg py-2 text-sm hover:bg-red-100 transition-colors"
-              >
-                Delete task
-              </button>
+                  onClick={() => setIsDeleteOpen(true)}
+                  className="w-full bg-red-50 text-red-500 border border-red-200 rounded-lg py-2 text-sm hover:bg-red-100 transition-colors"
+                >
+                  Delete task
+                </button>
               )}
             </div>
           </div>

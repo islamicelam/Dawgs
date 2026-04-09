@@ -116,7 +116,7 @@ export class TasksService {
     await this.ensureBoardAccess(boardId, user);
     return this.taskRepo.find({
       where: { board: { id: boardId } },
-      relations: ['status', 'assign'],
+      relations: ['status', 'assign', 'parentEpic', 'parentStory'],
       order: { order: 'ASC', createdAt: 'ASC' },
     });
   }
@@ -208,9 +208,19 @@ export class TasksService {
       subtasks: subtasks ?? task.subtasks,
       history: nextHistory,
       descriptionMentions: this.getMentions(description ?? task.description),
-      parentEpic: parentEpicId ? { id: parentEpicId } : task.parentEpic,
-      parentStory: parentStoryId ? { id: parentStoryId } : task.parentStory,
-    });
+      parentEpic:
+        parentEpicId === null
+          ? null
+          : parentEpicId
+            ? { id: parentEpicId }
+            : task.parentEpic,
+      parentStory:
+        parentStoryId === null
+          ? null
+          : parentStoryId
+            ? { id: parentStoryId }
+            : task.parentStory,
+    } as Task);
   }
 
   async reorder(taskIds: number[], user: User): Promise<void> {

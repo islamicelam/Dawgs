@@ -13,6 +13,8 @@ export const createTask = (
     type?: 'TASK' | 'USER_STORY' | 'EPIC';
     linkedTaskIds?: number[];
     subtasks?: { id: string; text: string; done: boolean }[];
+    parentEpicId?: number | null;
+    parentStoryId?: number | null;
   },
 ) => api.post(`/tasks/boards/${boardId}`, data);
 
@@ -26,6 +28,8 @@ export const updateTask = (
     type?: 'TASK' | 'USER_STORY' | 'EPIC';
     linkedTaskIds?: number[];
     subtasks?: { id: string; text: string; done: boolean }[];
+    parentEpicId?: number | null;
+    parentStoryId?: number | null;
   },
 ) => api.patch(`/tasks/${taskId}`, data);
 
