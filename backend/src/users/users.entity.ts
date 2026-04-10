@@ -32,7 +32,7 @@ export class User {
 
   @Column({
     type: 'varchar',
-    default: 'USER',
+    default: 'ADMIN',
   })
   role: UserRole;
 
