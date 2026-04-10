@@ -2,7 +2,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -27,9 +27,12 @@ api.interceptors.response.use(
       const storedRefreshToken = localStorage.getItem('refresh_token');
       if (storedRefreshToken) {
         try {
-          const res = await axios.post('http://localhost:3001/refresh', {
-            refresh_token: storedRefreshToken,
-          });
+          const res = await axios.post(
+            `${import.meta.env.VITE_API_URL}/refresh`,
+            {
+              refresh_token: storedRefreshToken,
+            },
+          );
           localStorage.setItem('token', res.data.access_token);
           localStorage.setItem('refresh_token', res.data.refresh_token);
           originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`;
