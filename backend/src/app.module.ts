@@ -31,7 +31,10 @@ import { StatusesModule } from './statuses/statuses.module';
         password: config.get<string>('POSTGRES_PASSWORD'),
         database: config.get<string>('POSTGRES_DB'),
         entities: [__dirname + '/**/*.entity.{ts,js}'],
-        synchronize: true, // ❗ только для локальной разработки
+        synchronize: true, // for local development
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
 
