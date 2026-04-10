@@ -54,6 +54,9 @@ const BoardPage = () => {
     null,
   );
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [dragOriginStatusId, setDragOriginStatusId] = useState<number | null>(
+    null,
+  );
 
   const [isEditBoardOpen, setIsEditBoardOpen] = useState(false);
   const [isDeleteBoardOpen, setIsDeleteBoardOpen] = useState(false);
@@ -139,8 +142,15 @@ const BoardPage = () => {
     setStatuses(res.data);
   };
 
-  const handleDragStart = (event: DragStartEvent) =>
-    setActiveId(String(event.active.id));
+  const handleDragStart = (event: DragStartEvent) => {
+    const id = String(event.active.id);
+    setActiveId(id);
+    if (id.startsWith('task-')) {
+      const taskId = Number(id.replace('task-', ''));
+      const task = tasks.find((t) => t.id === taskId);
+      setDragOriginStatusId(task?.status?.id ?? null);
+    }
+  };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
@@ -184,10 +194,7 @@ const BoardPage = () => {
       else if (overIdStr.startsWith('task-')) {
         const overTask = tasks.find((t) => `task-${t.id}` === overIdStr);
         newStatusId = overTask?.status?.id ?? null;
-        if (
-          overTask &&
-          overTask.status?.id === tasks.find((t) => t.id === taskId)?.status?.id
-        ) {
+        if (overTask && overTask.status?.id === dragOriginStatusId) {
           const statusTasks = tasks
             .filter((t) => t.status?.id === overTask.status?.id)
             .sort((a, b) => a.order - b.order);
@@ -211,7 +218,7 @@ const BoardPage = () => {
     ? tasks.find((t) => `task-${t.id}` === activeId)
     : null;
   const selectedTask = selectedTaskId
-    ? tasks.find((t) => t.id === selectedTaskId) ?? null
+    ? (tasks.find((t) => t.id === selectedTaskId) ?? null)
     : null;
 
   if (loading)
@@ -247,11 +254,11 @@ const BoardPage = () => {
             </button>
             {canDelete && (
               <button
-              onClick={() => setIsDeleteBoardOpen(true)}
-              className="text-slate-300 hover:text-red-500 transition-colors"
-            >
-              🗑️
-            </button>
+                onClick={() => setIsDeleteBoardOpen(true)}
+                className="text-slate-300 hover:text-red-500 transition-colors"
+              >
+                🗑️
+              </button>
             )}
           </div>
           <p className="text-sm text-slate-400">
