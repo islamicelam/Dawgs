@@ -1,4 +1,4 @@
-# 🐾 DAWGS — Project Management Tool
+# 🐾 DAWGS — Task Management Tool
 
 A Trello-like project management application built with NestJS + React.
 
