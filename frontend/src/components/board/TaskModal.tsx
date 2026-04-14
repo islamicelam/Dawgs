@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { addTaskComment, deleteTask, updateTask } from '../../api/tasks';
 import type { Task, Status, User } from '../../types';
 import ConfirmModal from '../common/ConfirmModal';
+import { improveText } from '../../api/ai';
 
 const TaskModal = ({
   task,
@@ -84,6 +85,16 @@ const TaskModal = ({
     await addTaskComment(task.id, comment.trim());
     setComment('');
     onUpdate();
+  };
+
+  const [isImproving, setIsImproving] = useState(false);
+
+  const handleImprove = async () => {
+    if (!description.trim()) return;
+    setIsImproving(true);
+    const data = await improveText(description);
+    setDescription(data);
+    setIsImproving(false);
   };
 
   return (
@@ -204,18 +215,13 @@ const TaskModal = ({
                 rows={4}
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 resize-none"
               />
-              {!!task.descriptionMentions?.length && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {task.descriptionMentions.map((mention) => (
-                    <span
-                      key={mention}
-                      className="text-xs px-2 py-0.5 rounded-full bg-fuchsia-100 text-fuchsia-700"
-                    >
-                      Mentioned: @{mention}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <button
+                onClick={handleImprove}
+                disabled={isImproving || !description.trim()}
+                className="mt-1 px-3 py-1 text-xs bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 disabled:opacity-50"
+              >
+                {isImproving ? 'Improving...' : '✨ Improve with AI'}
+              </button>
             </div>
             <div>
               <label className="text-xs text-slate-500 mb-1 block">
