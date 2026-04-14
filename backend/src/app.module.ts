@@ -12,6 +12,7 @@ import { RolesGuard } from './auth/roles.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { StatusesModule } from './statuses/statuses.module';
 import { LoggerMiddleware } from './logger.middleware';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -33,9 +34,9 @@ import { LoggerMiddleware } from './logger.middleware';
         database: config.get<string>('POSTGRES_DB'),
         entities: [__dirname + '/**/*.entity.{ts,js}'],
         synchronize: true, // for local development
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        // ssl: {
+        //   rejectUnauthorized: false,
+        // },
       }),
     }),
 
@@ -45,6 +46,7 @@ import { LoggerMiddleware } from './logger.middleware';
     ProjectsModule,
     BoardsModule,
     StatusesModule,
+    AiModule,
   ],
 
   providers: [
