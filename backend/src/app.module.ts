@@ -34,9 +34,10 @@ import { AiModule } from './ai/ai.module';
         database: config.get<string>('POSTGRES_DB'),
         entities: [__dirname + '/**/*.entity.{ts,js}'],
         synchronize: true, // for local development
-        // ssl: {
-        //   rejectUnauthorized: false,
-        // },
+        ssl:
+          process.env.NODE_ENV === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
     }),
 
