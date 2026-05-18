@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,8 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private jwtService: JwtService,
@@ -64,8 +66,10 @@ export class AuthService {
       user.refreshTokenHash = await bcrypt.hash(tokens.refresh_token, 10);
       await this.userRepo.save(user);
       return tokens;
-    } catch {
-      throw new UnauthorizedException('Refresh token invalid');
+    } catch (error: unknown) {
+      if (error instanceof UnauthorizedException) throw error;
+      this.logger.error('Unexpected error during token refresh', error instanceof Error ? error.stack : error);
+      throw new InternalServerErrorException('Token refresh failed');
     }
   }
 }
