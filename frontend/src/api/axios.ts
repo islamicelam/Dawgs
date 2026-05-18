@@ -3,14 +3,7 @@ import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true,
 });
 
 api.interceptors.response.use(
@@ -24,27 +17,15 @@ api.interceptors.response.use(
       !originalRequest?._retry
     ) {
       originalRequest._retry = true;
-      const storedRefreshToken = localStorage.getItem('refresh_token');
-      if (storedRefreshToken) {
-        try {
-          const res = await axios.post(
-            `${import.meta.env.VITE_API_URL}/refresh`,
-            {
-              refresh_token: storedRefreshToken,
-            },
-          );
-          localStorage.setItem('token', res.data.access_token);
-          localStorage.setItem('refresh_token', res.data.refresh_token);
-          originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`;
-          return api(originalRequest);
-        } catch {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-        }
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/refresh`,
+          {},
+          { withCredentials: true },
+        );
+        return api(originalRequest);
+      } catch {
+        localStorage.removeItem('me');
         window.location.href = '/login';
       }
     } else {

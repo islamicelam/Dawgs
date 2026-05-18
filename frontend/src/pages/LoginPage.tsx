@@ -22,9 +22,7 @@ const LoginPage = () => {
       }
       try {
         await register(name, email, password);
-        const response = await login(email, password);
-        localStorage.setItem('token', response.data.access_token);
-        localStorage.setItem('refresh_token', response.data.refresh_token);
+        await login(email, password);
         const me = await getMe();
         localStorage.setItem('me', JSON.stringify(me.data));
         navigate('/projects');
@@ -33,9 +31,7 @@ const LoginPage = () => {
       }
     } else {
       try {
-        const response = await login(email, password);
-        localStorage.setItem('token', response.data.access_token);
-        localStorage.setItem('refresh_token', response.data.refresh_token);
+        await login(email, password);
         const me = await getMe();
         localStorage.setItem('me', JSON.stringify(me.data));
         navigate('/projects');

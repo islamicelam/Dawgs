@@ -17,7 +17,7 @@ function App() {
       </Route>
       <Route path="/" element={<Navigate to="/projects" />} />
       <Route path="*" element={
-        localStorage.getItem('token') ? <Navigate to="/projects" /> : <Navigate to="/login" />
+        localStorage.getItem('me') ? <Navigate to="/projects" /> : <Navigate to="/login" />
       } />
     </Routes>
   );

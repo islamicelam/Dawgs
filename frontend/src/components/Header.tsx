@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
 const Header = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refresh_token');
+  const handleLogout = async () => {
+    try { await api.post('/logout'); } catch { /* cookie cleared server-side on best-effort */ }
     localStorage.removeItem('me');
     navigate('/login');
   };
