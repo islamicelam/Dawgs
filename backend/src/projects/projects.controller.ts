@@ -46,7 +46,11 @@ export class ProjectsController {
     @Param('id') projectId: number,
     @Request() req,
   ) {
-    return await this.projectsService.update(projectId, updateProjectDto, req.user);
+    return await this.projectsService.update(
+      projectId,
+      updateProjectDto,
+      req.user,
+    );
   }
 
   @Delete(':id')

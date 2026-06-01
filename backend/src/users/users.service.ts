@@ -46,13 +46,17 @@ export class UsersService {
       }
       const user = await this.userRepo.findOneBy({ id });
       if (!user) throw new NotFoundException('User not found');
-      
-      const isValid = await bcrypt.compare(updateUserDto.currentPassword, user.password);
-      if (!isValid) throw new BadRequestException('Current password is incorrect');
-      
+
+      const isValid = await bcrypt.compare(
+        updateUserDto.currentPassword,
+        user.password,
+      );
+      if (!isValid)
+        throw new BadRequestException('Current password is incorrect');
+
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-    
+
     const { currentPassword, ...rest } = updateUserDto;
     return this.userRepo.save({ ...rest, id });
   }

@@ -1,4 +1,12 @@
-import { IsString, MinLength, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  IsNumber,
+  IsOptional,
+  IsIn,
+  IsISO8601,
+} from 'class-validator';
+import { TaskPriority } from '../tasks.entity';
 
 export class CreateTaskDto {
   @IsString()
@@ -34,4 +42,12 @@ export class CreateTaskDto {
   @IsOptional()
   @IsNumber()
   parentStoryId?: number;
+
+  @IsOptional()
+  @IsIn(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+  priority?: TaskPriority;
+
+  @IsOptional()
+  @IsISO8601()
+  dueDate?: string | null;
 }

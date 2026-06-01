@@ -12,6 +12,8 @@ import {
 
 export type TaskType = 'TASK' | 'USER_STORY' | 'EPIC';
 
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
 export interface TaskComment {
   id: string;
   text: string;
@@ -97,4 +99,10 @@ export class Task {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ type: 'varchar', default: 'MEDIUM' })
+  priority: TaskPriority;
+
+  @Column({ type: 'date', nullable: true })
+  dueDate: Date | null;
 }

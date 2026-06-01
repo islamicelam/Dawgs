@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,7 +22,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  private async signTokens(user: User) {
+  private signTokens(user: User) {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -34,14 +39,16 @@ export class AuthService {
     return { access_token, refresh_token };
   }
 
-  async login(userDto: LoginDto): Promise<{ access_token: string; refresh_token: string }> {
+  async login(
+    userDto: LoginDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.userRepo.findOne({
       where: { email: userDto.email },
     });
     if (!user || !(await bcrypt.compare(userDto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const tokens = await this.signTokens(user);
+    const tokens = this.signTokens(user);
     const refreshTokenHash = await bcrypt.hash(tokens.refresh_token, 10);
     await this.userRepo.save({ ...user, refreshTokenHash });
     return {
@@ -49,7 +56,9 @@ export class AuthService {
     };
   }
 
-  async refresh(refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
+  async refresh(
+    refreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
         secret:
@@ -62,13 +71,16 @@ export class AuthService {
       }
       const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
       if (!isValid) throw new UnauthorizedException('Refresh token invalid');
-      const tokens = await this.signTokens(user);
+      const tokens = this.signTokens(user);
       user.refreshTokenHash = await bcrypt.hash(tokens.refresh_token, 10);
       await this.userRepo.save(user);
       return tokens;
     } catch (error: unknown) {
       if (error instanceof UnauthorizedException) throw error;
-      this.logger.error('Unexpected error during token refresh', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Unexpected error during token refresh',
+        error instanceof Error ? error.stack : error,
+      );
       throw new InternalServerErrorException('Token refresh failed');
     }
   }
