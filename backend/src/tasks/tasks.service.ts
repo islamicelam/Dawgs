@@ -72,6 +72,8 @@ export class TasksService {
       subtasks,
       parentEpicId,
       parentStoryId,
+      priority,
+      dueDate,
       ...rest
     } = createTaskDto;
 
@@ -108,6 +110,8 @@ export class TasksService {
       descriptionMentions: this.getMentions(description),
       parentEpic: parentEpicId ? { id: parentEpicId } : undefined,
       parentStory: parentStoryId ? { id: parentStoryId } : undefined,
+      priority: priority ?? 'MEDIUM',
+      dueDate: dueDate ?? undefined,
     });
     return await this.taskRepo.save(task);
   }
@@ -179,6 +183,8 @@ export class TasksService {
       subtasks,
       parentEpicId,
       parentStoryId,
+      priority,
+      dueDate,
       ...rest
     } = updateTaskDto;
 
@@ -220,6 +226,8 @@ export class TasksService {
           : parentStoryId
             ? { id: parentStoryId }
             : task.parentStory,
+      priority: priority ?? task.priority,
+      dueDate: dueDate ?? task.dueDate,
     } as Task);
   }
 
