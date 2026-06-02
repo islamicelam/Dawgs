@@ -1,4 +1,5 @@
 import api from './axios';
+import type { TaskPriority } from '../types';
 
 export const getTasks = (boardId: number) =>
   api.get(`/tasks/boards/${boardId}`);
@@ -11,6 +12,8 @@ export const createTask = (
     statusId?: number;
     assignId?: number;
     type?: 'TASK' | 'USER_STORY' | 'EPIC';
+    priority?: TaskPriority;
+    dueDate?: string | null;
     linkedTaskIds?: number[];
     subtasks?: { id: string; text: string; done: boolean }[];
     parentEpicId?: number | null;
@@ -26,6 +29,8 @@ export const updateTask = (
     statusId?: number;
     assignId?: number;
     type?: 'TASK' | 'USER_STORY' | 'EPIC';
+    priority?: TaskPriority;
+    dueDate?: string | null;
     linkedTaskIds?: number[];
     subtasks?: { id: string; text: string; done: boolean }[];
     parentEpicId?: number | null;

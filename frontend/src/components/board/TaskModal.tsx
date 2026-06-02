@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { addTaskComment, deleteTask, updateTask } from '../../api/tasks';
-import type { Task, Status, User } from '../../types';
+import type { Task, Status, User, TaskPriority } from '../../types';
+import { TASK_PRIORITIES, PRIORITY_LABEL } from '../../constants/task';
 import ConfirmModal from '../common/ConfirmModal';
 import { improveText } from '../../api/ai';
 
@@ -41,6 +42,10 @@ const TaskModal = ({
   const [parentStoryId, setParentStoryId] = useState<number | ''>(
     task.parentStory?.id ?? '',
   );
+  const [priority, setPriority] = useState<TaskPriority>(
+    task.priority ?? 'MEDIUM',
+  );
+  const [dueDate, setDueDate] = useState((task.dueDate ?? '').slice(0, 10));
 
   const appendMention = (name: string, target: 'description' | 'comment') => {
     const token = `@${name}`;
@@ -56,6 +61,8 @@ const TaskModal = ({
       assignId: assignId !== '' ? assignId : undefined,
       statusId: statusId !== '' ? statusId : undefined,
       type,
+      priority,
+      dueDate: dueDate || null,
       subtasks,
       linkedTaskIds,
       parentEpicId: parentEpicId !== '' ? parentEpicId : null,
@@ -152,6 +159,36 @@ const TaskModal = ({
                 <option value="EPIC">Epic</option>
               </select>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Priority
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                >
+                  {TASK_PRIORITIES.map((p) => (
+                    <option key={p} value={p}>
+                      {PRIORITY_LABEL[p]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Due date
+                </label>
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
+            </div>
+
             {type !== 'EPIC' && (
               <div>
                 <label className="text-xs text-slate-500 mb-1 block">

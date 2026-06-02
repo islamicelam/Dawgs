@@ -27,12 +27,16 @@ export interface Status {
   category: string;
 }
 
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
 export interface Task {
   id: number;
   title: string;
   description?: string;
   order: number;
   type: 'TASK' | 'USER_STORY' | 'EPIC';
+  priority: TaskPriority;
+  dueDate?: string | null;
   comments: {
     id: string;
     text: string;
