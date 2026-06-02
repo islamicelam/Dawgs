@@ -31,14 +31,24 @@ const ProjectsPage = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   const loadProjects = async () => {
-    const response = await getProjects();
-    setProjects(response.data);
+    const [projectsRes, usersRes] = await Promise.all([
+      getProjects(),
+      getUsers(),
+    ]);
+    setProjects(projectsRes.data);
+    setAllUsers(usersRes.data);
   };
-
+  
   useEffect(() => {
-    loadProjects().finally(() => setLoading(false));
-    void getUsers().then((res) => setAllUsers(res.data));
+    void (async () => {
+      try {
+        await loadProjects();
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
+  
   const handleToggleShare = async (
     projectId: number,
     userId: number,
