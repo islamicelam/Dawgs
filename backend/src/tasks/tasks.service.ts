@@ -12,6 +12,7 @@ import { User } from 'src/users/users.entity';
 import { randomUUID } from 'crypto';
 import { Board } from 'src/boards/boards.entity';
 import { Project } from 'src/projects/projects.entity';
+import { SearchOutbox } from 'src/search/search-outbox.entity';
 
 @Injectable()
 export class TasksService {
@@ -113,7 +114,14 @@ export class TasksService {
       priority: priority ?? 'MEDIUM',
       dueDate: dueDate ?? undefined,
     });
-    return await this.taskRepo.save(task);
+    return await this.taskRepo.manager.transaction(async (manager) => {
+      const saved = await manager.save(task);
+      await manager.save(SearchOutbox, {
+        aggregateId: saved.id,
+        operation: 'UPSERT',
+      });
+      return saved;
+    });
   }
 
   async findAll(boardId: number, user: User): Promise<Task[]> {
@@ -161,11 +169,13 @@ export class TasksService {
 
   async remove(id: number, user: User): Promise<void> {
     await this.findOne(id, user);
-    const result = await this.taskRepo.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException(`Task with ID ${id} not found`);
-    }
+    await this.taskRepo.manager.transaction(async (manager) => {
+      await manager.delete(Task, id);
+      await manager.save(SearchOutbox, {
+        aggregateId: id,
+        operation: 'DELETE',
+      });
+    });
   }
 
   async update(
@@ -204,7 +214,7 @@ export class TasksService {
       ...(task.history ?? []),
       this.history('Task updated', user),
     ];
-    return await this.taskRepo.save({
+    const payload = {
       ...task,
       ...rest,
       description: description ?? task.description,
@@ -228,7 +238,16 @@ export class TasksService {
             : task.parentStory,
       priority: priority ?? task.priority,
       dueDate: dueDate ?? task.dueDate,
-    } as Task);
+    } as Task;
+
+    return this.taskRepo.manager.transaction(async (manager) => {
+      const saved = await manager.save(Task, payload);
+      await manager.save(SearchOutbox, {
+        aggregateId: saved.id,
+        operation: 'UPSERT',
+      });
+      return saved;
+    });
   }
 
   async reorder(taskIds: number[], user: User): Promise<void> {

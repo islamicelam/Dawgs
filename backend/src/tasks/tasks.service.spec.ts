@@ -20,11 +20,19 @@ describe('TasksService - priority & dueDate', () => {
       getRawOne: jest.fn().mockResolvedValue({ max: '0' }),
     } as any;
 
+    const manager = {
+      save: jest.fn((a, b) => Promise.resolve(b ?? a)),
+      delete: jest.fn(),
+    };
+
     repo = {
       createQueryBuilder: jest.fn().mockReturnValue(qb),
       create: jest.fn((x) => x),
       save: jest.fn((x) => Promise.resolve(x)),
       findOne: jest.fn().mockResolvedValue({}),
+      manager: {
+        transaction: jest.fn((cb) => cb(manager)),
+      },
     } as any;
 
     const moduleRef = await Test.createTestingModule({
