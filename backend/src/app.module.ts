@@ -13,13 +13,15 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { StatusesModule } from './statuses/statuses.module';
 import { LoggerMiddleware } from './logger.middleware';
 import { AiModule } from './ai/ai.module';
+import { BullModule } from '@nestjs/bullmq';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
     // ENV configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', '../.env'],
     }),
 
     // Database connection
@@ -41,6 +43,16 @@ import { AiModule } from './ai/ai.module';
       }),
     }),
 
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+        },
+      }),
+    }),
+
     UsersModule,
     TasksModule,
     AuthModule,
@@ -48,6 +60,7 @@ import { AiModule } from './ai/ai.module';
     BoardsModule,
     StatusesModule,
     AiModule,
+    SearchModule,
   ],
 
   providers: [
