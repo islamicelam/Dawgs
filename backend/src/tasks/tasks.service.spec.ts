@@ -21,9 +21,9 @@ describe('TasksService - priority & dueDate', () => {
     } as any;
 
     const manager = {
-        save: jest.fn((a, b) => Promise.resolve(b ?? a)),
-        delete: jest.fn(),
-      };
+      save: jest.fn((a, b) => Promise.resolve(b ?? a)),
+      delete: jest.fn(),
+    };
 
     repo = {
       createQueryBuilder: jest.fn().mockReturnValue(qb),
@@ -31,7 +31,7 @@ describe('TasksService - priority & dueDate', () => {
       save: jest.fn((x) => Promise.resolve(x)),
       findOne: jest.fn().mockResolvedValue({}),
       manager: {
-        transaction: jest.fn(async (cb) => cb(manager)),
+        transaction: jest.fn((cb) => cb(manager)),
       },
     } as any;
 
