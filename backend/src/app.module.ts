@@ -15,6 +15,7 @@ import { LoggerMiddleware } from './logger.middleware';
 import { AiModule } from './ai/ai.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './search/search.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -52,6 +53,8 @@ import { SearchModule } from './search/search.module';
         },
       }),
     }),
+
+    ScheduleModule.forRoot(),
 
     UsersModule,
     TasksModule,
