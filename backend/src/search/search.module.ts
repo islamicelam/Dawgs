@@ -7,6 +7,8 @@ import { OutboxRelay } from './outbox.relay';
 import { SearchOutbox } from './search-outbox.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
+import { Task } from 'src/tasks/tasks.entity';
+import { SearchController } from './search.controller';
 
 @Module({
   imports: [
@@ -16,10 +18,11 @@ import { BullModule } from '@nestjs/bullmq';
         node: config.get<string>('ELASTICSEARCH_NODE'),
       }),
     }),
-    TypeOrmModule.forFeature([SearchOutbox]),
+    TypeOrmModule.forFeature([SearchOutbox, Task]),
     BullModule.registerQueue({ name: 'search' }),
   ],
   providers: [SearchService, SearchProcessor, OutboxRelay],
   exports: [SearchService, ElasticsearchModule],
+  controllers: [SearchController],
 })
 export class SearchModule {}
