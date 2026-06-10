@@ -1,7 +1,10 @@
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Project } from 'src/projects/projects.entity';
 import { Task } from 'src/tasks/tasks.entity';
+import { User } from 'src/users/users.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,6 +14,8 @@ export class SearchService implements OnModuleInit {
   constructor(
     private readonly es: ElasticsearchService,
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
+    @InjectRepository(Project)
+    private readonly projectRepo: Repository<Project>,
   ) {}
 
   async onModuleInit() {
@@ -77,5 +82,45 @@ export class SearchService implements OnModuleInit {
       await this.indexTask(task);
     }
     return tasks.length;
+  }
+
+  async search(q: string, user: User): Promise<unknown[]> {
+    const filter: QueryDslQueryContainer[] = [];
+    if (user.role !== 'ADMIN') {
+      const projects = await this.projectRepo.find({
+        where: { members: { id: user.id } },
+        select: { id: true },
+      });
+      const projectIds = projects.map((p) => p.id);
+      if (projectIds.length === 0) return [];
+      filter.push({ terms: { projectId: projectIds } });
+    }
+
+    const result = await this.es.search({
+      index: 'tasks',
+      size: 50,
+      query: {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                query: q,
+                fields: ['title^2', 'description'], // title has more priority
+                fuzziness: 'AUTO',
+              },
+            },
+          ],
+          filter, // getting rid of other
+        },
+      },
+      highlight: { fields: { title: {}, description: {} } },
+    });
+
+    return result.hits.hits.map((hit) => ({
+      id: Number(hit._id),
+      score: hit._score,
+      ...(hit._source as object),
+      highlight: hit.highlight,
+    }));
   }
 }
