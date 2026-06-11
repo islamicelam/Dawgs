@@ -29,6 +29,22 @@ export interface Status {
 
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
+export interface SearchResult {
+  id: number;
+  score: number;
+  title: string;
+  description?: string;
+  priority: TaskPriority;
+  type: 'TASK' | 'USER_STORY' | 'EPIC';
+  projectId: number;
+  boardId: number;
+  status?: string;
+  highlight?: {
+    title?: string[];
+    description?: string[];
+  };
+}
+
 export interface Task {
   id: number;
   title: string;

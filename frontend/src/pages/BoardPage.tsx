@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getTasks, createTask, reorderTasks, updateTask } from '../api/tasks';
 import {
   getStatuses,
@@ -38,6 +38,7 @@ const BoardPage = () => {
   const { id } = useParams<{ id: string }>();
   const boardId = Number(id);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [board, setBoard] = useState<Board | null>(null);
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -81,7 +82,13 @@ const BoardPage = () => {
     setTasks(taskRes.data);
     setUsers(usersRes.data);
     setLoading(false);
-  }, [boardId]);
+
+    const taskId = searchParams.get('taskId');
+    if (taskId && taskRes.data.some((t: Task) => t.id === Number(taskId))) {
+      setSelectedTaskId(Number(taskId));
+      setSearchParams({}, { replace: true });
+    }
+  }, [boardId, searchParams, setSearchParams]);
 
   useEffect(() => {
     void (async () => {
