@@ -22,32 +22,32 @@ let work pile up); always run lint+build+test locally before commit; branch off 
 PR → CI gates merge → delete branch after merge. Explain concepts junior-level when asked;
 give exact commands when the user asks "how do I...".
 
-## Current state (as of 2026-06-10)
+## Current state (as of 2026-06-11)
 
-**In progress: Global Search (Elasticsearch + Redis + BullMQ), overkill-by-design.**
+**Global Search is DONE end-to-end** (PRs #6–#10), overkill-by-design: ES 9.4.2 + Redis
+in docker-compose; SearchModule (`backend/src/search/`) with `ensureIndex()` mapping;
+transactional outbox (`SearchOutbox`, same TX as task writes in TasksService); OutboxRelay
+(`@Interval(5000)` → BullMQ, `jobId: outbox-<id>`, attempts:3 + backoff); SearchProcessor
+(UPSERT: fetch task with relations `['board','board.project','status']` → `indexTask()`,
+doc `_id` = task.id, includes projectId; DELETE: `removeFromIndex()` swallows 404);
+`reindexAll()` + admin-only `POST /search/reindex`; `GET /search?q=` — multi_match
+`title^2`/`description`, `fuzziness: AUTO`, highlight, **access-scoped** (non-ADMIN
+filtered by `terms: {projectId: <user's project ids>}`, empty → `[]`); frontend header
+search with ~300ms debounce, highlight dropdown, navigation.
 
-Done & merged (PRs #6–#8): ES 9.4.2 + Redis in docker-compose; SearchModule
-(`backend/src/search/`) with ES client + `ensureIndex()` mapping (title/description=text,
-priority=keyword); transactional outbox (`SearchOutbox` entity, written in same TX as task
-create/update/delete in TasksService); OutboxRelay (`@Interval(5000)`, polls unprocessed
-rows, enqueues BullMQ jobs, `jobId: outbox-<id>` for dedup, attempts:3 + exp backoff);
-SearchProcessor (WorkerHost) — UPSERT: fetch task from DB with relations
-`['board','board.project','status']` → `indexTask()` (doc `_id` = task.id, includes
-projectId for access filtering); DELETE: `removeFromIndex()` (swallows 404);
-`reindexAll()` + admin-only `POST /search/reindex` backfill.
+README/ROADMAP just updated for search. **ROADMAP.md is the plan of record — keep
+ticking it.**
 
-**Next (user is implementing now): Phase 2 — `GET /search?q=`** in SearchService/Controller:
-- multi_match over `title^2`/`description`, `fuzziness: 'AUTO'`, highlight
-- **access scoping (critical security):** non-ADMIN → fetch user's project ids from
-  `projectRepo` (members contains user), `filter: [{ terms: { projectId } }]`; empty
-  projects → return `[]`. ADMIN unfiltered. Needs `Project` added to
-  `TypeOrmModule.forFeature` in SearchModule.
-- Verify BOTH: finds tasks AND does not leak other users' tasks.
-
-**Then: Phase 3 — frontend search UI (Claude writes):** header search box, ~300ms
-debounce, results dropdown with ES highlight, navigate to task/board, loading/empty states.
-
-**After search is done: remind the user to update README and ROADMAP.md** (he asked).
+**Next up (order agreed): Layer 1 finish:**
+1. **Labels** ← next. Design already agreed: `Label` entity (name, hex color validated
+   `@Matches(/^#[0-9A-Fa-f]{6}$/)`), project-scoped (`@ManyToOne` Project), ManyToMany
+   with Task (`@JoinTable` on Task side only), `labelIds?: number[]` in task DTOs,
+   CRUD endpoints with project-membership access checks, then frontend (Claude).
+   NB: when Task changes include labels, the existing search outbox already covers
+   reindexing.
+2. **Board filters** — assignee/type/priority/label; mostly frontend (Claude writes).
+3. **Notifications** — entity + triggers on @mentions/assignment; **reuse BullMQ** for
+   async fan-out; bell UI. Email later (Layer 3).
 
 ## How to run / verify
 
