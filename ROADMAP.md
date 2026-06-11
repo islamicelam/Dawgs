@@ -26,10 +26,14 @@ Each item names the **tech to adopt with it**.
 
 ### Layer 1 — Core product basics
 - [x] **Priority + due date** on tasks — *done* (badges + overdue highlight)
-- [ ] **Labels** — new entity, ManyToMany with Task (TypeORM relations, `@JoinTable`)
+- [x] **Global search** — *done, overkill edition*: Elasticsearch 9 + Redis + BullMQ,
+  transactional outbox, relay + worker, admin reindex, access-scoped `GET /search`
+  (fuzziness + highlight), debounced header search UI
+- [ ] **Labels** — new entity, ManyToMany with Task (TypeORM relations, `@JoinTable`);
+  design already discussed: project-scoped, `labelIds` in task DTOs ← **next**
 - [ ] **Board filters** — assignee / type / priority / label (frontend state)
-- [ ] **Global search** — Postgres `ILIKE` first; upgrade later (Layer 2 / backlog)
-- [ ] **Notifications** — entity + triggers on @mentions / assignment (bell UI)
+- [ ] **Notifications** — entity + triggers on @mentions / assignment (bell UI);
+  reuse BullMQ queue infra for async fan-out
 
 ### Layer 2 — AI (Gemini already wired)
 - [ ] AI **break down an Epic** into user stories (structured output)
@@ -78,7 +82,11 @@ Introduce as features justify them:
 
 ## Current status
 
-- **Done:** priority/dueDate (backend + tests + CI + frontend UI), GitHub Actions CI
-- **Next up:** Layer 1 → **Labels**, then **Board filters**
+- **Done:** priority/dueDate; CI; **Global Search end-to-end** (ES 9 + Redis + BullMQ +
+  outbox + worker + access-scoped endpoint + frontend UI) — PRs #6–#10
+- **Tech adopted so far:** Elasticsearch, Redis, BullMQ (queues/workers),
+  transactional outbox pattern, GitHub Actions
+- **Next up:** Layer 1 → **Labels** (design agreed, ready to implement), then
+  **Board filters**, then **Notifications** (reuse BullMQ)
 
 > Keep this file alive: tick boxes and update "Current status" after each feature.
