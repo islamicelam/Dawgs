@@ -16,6 +16,7 @@ import { AiModule } from './ai/ai.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './search/search.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LabelsModule } from './labels/labels.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     StatusesModule,
     AiModule,
     SearchModule,
+    LabelsModule,
   ],
 
   providers: [

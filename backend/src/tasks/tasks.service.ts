@@ -75,6 +75,7 @@ export class TasksService {
       parentStoryId,
       priority,
       dueDate,
+      labelIds,
       ...rest
     } = createTaskDto;
 
@@ -113,6 +114,7 @@ export class TasksService {
       parentStory: parentStoryId ? { id: parentStoryId } : undefined,
       priority: priority ?? 'MEDIUM',
       dueDate: dueDate ?? undefined,
+      labels: labelIds ? labelIds.map((id) => ({ id })) : [],
     });
     return await this.taskRepo.manager.transaction(async (manager) => {
       const saved = await manager.save(task);
@@ -195,6 +197,7 @@ export class TasksService {
       parentStoryId,
       priority,
       dueDate,
+      labelIds,
       ...rest
     } = updateTaskDto;
 
@@ -238,6 +241,7 @@ export class TasksService {
             : task.parentStory,
       priority: priority ?? task.priority,
       dueDate: dueDate ?? task.dueDate,
+      labels: labelIds ? labelIds.map((id) => ({ id })) : task.labels,
     } as Task;
 
     return this.taskRepo.manager.transaction(async (manager) => {
