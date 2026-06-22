@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsIn,
   IsISO8601,
+  IsArray,
 } from 'class-validator';
 import { TaskPriority } from '../tasks.entity';
 
@@ -50,4 +51,9 @@ export class CreateTaskDto {
   @IsOptional()
   @IsISO8601()
   dueDate?: string | null;
+
+  @IsOptional()
+  @IsNumber({}, { each: true })
+  @IsArray()
+  labelIds?: number[];
 }

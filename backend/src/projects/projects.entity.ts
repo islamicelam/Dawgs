@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from 'src/users/users.entity';
+import { Label } from 'src/labels/labels.entity';
 
 @Entity('projects')
 export class Project {
@@ -34,4 +35,7 @@ export class Project {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => Label, (label) => label.project)
+  labels: Label[];
 }

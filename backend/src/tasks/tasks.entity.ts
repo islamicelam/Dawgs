@@ -1,4 +1,5 @@
 import { Board } from 'src/boards/boards.entity';
+import { Label } from 'src/labels/labels.entity';
 import { Status } from 'src/statuses/statuses.entity';
 import { User } from 'src/users/users.entity';
 import {
@@ -6,6 +7,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -105,4 +108,12 @@ export class Task {
 
   @Column({ type: 'date', nullable: true })
   dueDate: Date | null;
+
+  @ManyToMany(() => Label, (label) => label.tasks)
+  @JoinTable({
+    name: 'task_labels',
+    joinColumn: { name: 'taskId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'labelId', referencedColumnName: 'id' },
+  })
+  labels: Label[];
 }
