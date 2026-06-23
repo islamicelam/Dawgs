@@ -1,3 +1,9 @@
+export interface Label {
+  id: number;
+  name: string;
+  color: string;
+}
+
 export interface User {
   id: number;
   name: string;
@@ -76,4 +82,5 @@ export interface Task {
   createdAt: string;
   parentEpic?: Task;
   parentStory?: Task;
+  labels?: Label[];
 }

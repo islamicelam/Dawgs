@@ -18,6 +18,7 @@ export const createTask = (
     subtasks?: { id: string; text: string; done: boolean }[];
     parentEpicId?: number | null;
     parentStoryId?: number | null;
+    labelIds?: number[];
   },
 ) => api.post(`/tasks/boards/${boardId}`, data);
 
@@ -35,6 +36,7 @@ export const updateTask = (
     subtasks?: { id: string; text: string; done: boolean }[];
     parentEpicId?: number | null;
     parentStoryId?: number | null;
+    labelIds?: number[];
   },
 ) => api.patch(`/tasks/${taskId}`, data);
 

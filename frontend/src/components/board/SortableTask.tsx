@@ -90,6 +90,19 @@ const SortableTask = ({
           {task.subtasks.length} subtasks
         </p>
       )}
+      {!!task.labels?.length && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          {task.labels.map((label) => (
+            <span
+              key={label.id}
+              className="text-[10px] px-2 py-0.5 rounded-full text-white font-medium leading-tight"
+              style={{ background: label.color }}
+            >
+              {label.name}
+            </span>
+          ))}
+        </div>
+      )}
       {dueLabel && (
         <p
           className={`text-xs mt-1 inline-flex items-center gap-1 ${
