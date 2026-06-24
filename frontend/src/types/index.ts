@@ -25,6 +25,7 @@ export interface Board {
   id: number;
   name: string;
   createdAt: string;
+  project?: { id: number; name: string };
 }
 
 export interface Status {

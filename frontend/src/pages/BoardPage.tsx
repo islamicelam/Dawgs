@@ -42,11 +42,7 @@ const BoardPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Captured once at mount from the URL before searchParams get cleared
-  const [projectId] = useState<number | null>(() => {
-    const pid = new URLSearchParams(window.location.search).get('projectId');
-    return pid ? Number(pid) : null;
-  });
+  const [projectId, setProjectId] = useState<number | null>(null);
 
   const [board, setBoard] = useState<Board | null>(null);
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -82,19 +78,24 @@ const BoardPage = () => {
   );
 
   const loadData = useCallback(async () => {
-    const [boardRes, statusRes, taskRes, usersRes, labelsRes] =
-      await Promise.all([
-        getBoard(boardId),
-        getStatuses(boardId),
-        getTasks(boardId),
-        getUsers(),
-        projectId ? getLabels(projectId) : Promise.resolve(null),
-      ]);
+    const [boardRes, statusRes, taskRes, usersRes] = await Promise.all([
+      getBoard(boardId),
+      getStatuses(boardId),
+      getTasks(boardId),
+      getUsers(),
+    ]);
     setBoard(boardRes.data);
     setStatuses(statusRes.data);
     setTasks(taskRes.data);
     setUsers(usersRes.data);
-    if (labelsRes) setLabels(labelsRes.data);
+
+    const pid: number | undefined = boardRes.data?.project?.id;
+    if (pid) {
+      setProjectId(pid);
+      const labelsRes = await getLabels(pid);
+      setLabels(labelsRes.data);
+    }
+
     setLoading(false);
 
     const taskId = searchParams.get('taskId');
@@ -102,7 +103,7 @@ const BoardPage = () => {
       setSelectedTaskId(Number(taskId));
       setSearchParams({}, { replace: true });
     }
-  }, [boardId, projectId, searchParams, setSearchParams]);
+  }, [boardId, searchParams, setSearchParams]);
 
   useEffect(() => {
     void (async () => {
