@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { addTaskComment, deleteTask, updateTask } from '../../api/tasks';
-import type { Task, Status, User, TaskPriority } from '../../types';
+import type { Task, Status, User, TaskPriority, Label } from '../../types';
 import { TASK_PRIORITIES, PRIORITY_LABEL } from '../../constants/task';
 import ConfirmModal from '../common/ConfirmModal';
 import { improveText } from '../../api/ai';
@@ -10,6 +10,7 @@ const TaskModal = ({
   allTasks,
   statuses,
   users,
+  labels,
   canDelete,
   onClose,
   onUpdate,
@@ -18,6 +19,7 @@ const TaskModal = ({
   allTasks: Task[];
   statuses: Status[];
   users: User[];
+  labels: Label[];
   canDelete: boolean;
   onClose: () => void;
   onUpdate: () => void;
@@ -46,6 +48,9 @@ const TaskModal = ({
     task.priority ?? 'MEDIUM',
   );
   const [dueDate, setDueDate] = useState((task.dueDate ?? '').slice(0, 10));
+  const [labelIds, setLabelIds] = useState<number[]>(
+    task.labels?.map((l) => l.id) ?? [],
+  );
 
   const appendMention = (name: string, target: 'description' | 'comment') => {
     const token = `@${name}`;
@@ -67,6 +72,7 @@ const TaskModal = ({
       linkedTaskIds,
       parentEpicId: parentEpicId !== '' ? parentEpicId : null,
       parentStoryId: parentStoryId !== '' ? parentStoryId : null,
+      labelIds,
     });
     onUpdate();
     onClose();
@@ -260,6 +266,48 @@ const TaskModal = ({
                 {isImproving ? 'Improving...' : '✨ Improve with AI'}
               </button>
             </div>
+            {labels.length > 0 && (
+              <div>
+                <label className="text-xs text-slate-500 mb-2 block">
+                  Labels
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {labels.map((label) => {
+                    const active = labelIds.includes(label.id);
+                    return (
+                      <button
+                        key={label.id}
+                        type="button"
+                        onClick={() =>
+                          setLabelIds((prev) =>
+                            active
+                              ? prev.filter((id) => id !== label.id)
+                              : [...prev, label.id],
+                          )
+                        }
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                          active
+                            ? 'text-white border-transparent shadow-sm'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                        style={
+                          active
+                            ? { background: label.color, borderColor: label.color }
+                            : {}
+                        }
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ background: active ? 'white' : label.color }}
+                        />
+                        {label.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="text-xs text-slate-500 mb-1 block">
                 Linked tasks

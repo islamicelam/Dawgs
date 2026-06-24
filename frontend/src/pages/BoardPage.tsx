@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getTasks, createTask, reorderTasks, updateTask } from '../api/tasks';
+import { getLabels } from '../api/labels';
 import {
   getStatuses,
   createStatus,
@@ -10,7 +11,7 @@ import {
 } from '../api/statuses';
 import { deleteBoard, getBoard, updateBoard } from '../api/boards';
 import { getUsers } from '../api/users';
-import type { Task, Status, Board, User } from '../types';
+import type { Task, Status, Board, User, Label } from '../types';
 import {
   DndContext,
   type DragEndEvent,
@@ -33,12 +34,19 @@ import TaskModal from '../components/board/TaskModal';
 import BoardFormModal from '../components/board/BoardFormModal';
 import ConfirmModal from '../components/common/ConfirmModal';
 import Modal from '../components/common/Modal';
+import LabelsPanel from '../components/labels/LabelsPanel';
 
 const BoardPage = () => {
   const { id } = useParams<{ id: string }>();
   const boardId = Number(id);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Captured once at mount from the URL before searchParams get cleared
+  const [projectId] = useState<number | null>(() => {
+    const pid = new URLSearchParams(window.location.search).get('projectId');
+    return pid ? Number(pid) : null;
+  });
 
   const [board, setBoard] = useState<Board | null>(null);
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -63,6 +71,9 @@ const BoardPage = () => {
   const [isDeleteBoardOpen, setIsDeleteBoardOpen] = useState(false);
 
   const [filterAssignId, setFilterAssignId] = useState<number | ''>('');
+  const [filterLabelId, setFilterLabelId] = useState<number | ''>('');
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [isLabelsPanelOpen, setIsLabelsPanelOpen] = useState(false);
   const me = JSON.parse(localStorage.getItem('me') ?? 'null') as User | null;
   const canDelete = me?.role === 'ADMIN';
 
@@ -71,16 +82,19 @@ const BoardPage = () => {
   );
 
   const loadData = useCallback(async () => {
-    const [boardRes, statusRes, taskRes, usersRes] = await Promise.all([
-      getBoard(boardId),
-      getStatuses(boardId),
-      getTasks(boardId),
-      getUsers(),
-    ]);
+    const [boardRes, statusRes, taskRes, usersRes, labelsRes] =
+      await Promise.all([
+        getBoard(boardId),
+        getStatuses(boardId),
+        getTasks(boardId),
+        getUsers(),
+        projectId ? getLabels(projectId) : Promise.resolve(null),
+      ]);
     setBoard(boardRes.data);
     setStatuses(statusRes.data);
     setTasks(taskRes.data);
     setUsers(usersRes.data);
+    if (labelsRes) setLabels(labelsRes.data);
     setLoading(false);
 
     const taskId = searchParams.get('taskId');
@@ -88,7 +102,7 @@ const BoardPage = () => {
       setSelectedTaskId(Number(taskId));
       setSearchParams({}, { replace: true });
     }
-  }, [boardId, searchParams, setSearchParams]);
+  }, [boardId, projectId, searchParams, setSearchParams]);
 
   useEffect(() => {
     void (async () => {
@@ -280,7 +294,7 @@ const BoardPage = () => {
         </button>
       </div>
 
-      <div className="px-4 lg:px-6 pt-4 flex items-center gap-3">
+      <div className="px-4 lg:px-6 pt-4 flex items-center gap-3 flex-wrap">
         <span className="text-sm text-slate-500">Filter by:</span>
         <select
           value={filterAssignId}
@@ -296,6 +310,43 @@ const BoardPage = () => {
             </option>
           ))}
         </select>
+        {projectId !== null && (
+          <select
+            value={filterLabelId}
+            onChange={(e) =>
+              setFilterLabelId(e.target.value ? Number(e.target.value) : '')
+            }
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+          >
+            <option value="">All labels</option>
+            {labels.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {filterLabelId !== '' && (
+          <span
+            className="text-xs px-2.5 py-1 rounded-full text-white font-medium"
+            style={{
+              background:
+                labels.find((l) => l.id === filterLabelId)?.color ?? '#94a3b8',
+            }}
+          >
+            {labels.find((l) => l.id === filterLabelId)?.name}
+          </span>
+        )}
+        <div className="ml-auto">
+          {projectId !== null && (
+            <button
+              onClick={() => setIsLabelsPanelOpen(true)}
+              className="text-sm text-slate-500 hover:text-slate-800 border border-slate-200 rounded-lg px-3 py-1.5 transition-colors hover:border-slate-300"
+            >
+              🏷 Labels
+            </button>
+          )}
+        </div>
       </div>
 
       <DndContext
@@ -320,6 +371,11 @@ const BoardPage = () => {
                   .filter(
                     (t) =>
                       filterAssignId === '' || t.assign?.id === filterAssignId,
+                  )
+                  .filter(
+                    (t) =>
+                      filterLabelId === '' ||
+                      t.labels?.some((l) => l.id === filterLabelId),
                   )}
                 statuses={statuses}
                 onMove={handleMoveTask}
@@ -353,9 +409,19 @@ const BoardPage = () => {
           allTasks={tasks}
           statuses={statuses}
           users={users}
+          labels={labels}
           canDelete={canDelete}
           onClose={() => setSelectedTaskId(null)}
           onUpdate={loadData}
+        />
+      )}
+
+      {isLabelsPanelOpen && projectId !== null && (
+        <LabelsPanel
+          projectId={projectId}
+          labels={labels}
+          onClose={() => setIsLabelsPanelOpen(false)}
+          onUpdate={() => void loadData()}
         />
       )}
 

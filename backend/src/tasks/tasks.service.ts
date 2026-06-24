@@ -130,7 +130,7 @@ export class TasksService {
     await this.ensureBoardAccess(boardId, user);
     return this.taskRepo.find({
       where: { board: { id: boardId } },
-      relations: ['status', 'assign', 'parentEpic', 'parentStory'],
+      relations: ['status', 'assign', 'parentEpic', 'parentStory', 'labels'],
       order: { order: 'ASC', createdAt: 'ASC' },
     });
   }
@@ -157,6 +157,7 @@ export class TasksService {
         'board.project',
         'parentEpic',
         'parentStory',
+        'labels',
       ],
     });
     if (!task) throw new NotFoundException('Task not found');

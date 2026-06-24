@@ -54,7 +54,7 @@ const SearchBar = () => {
     setIsOpen(false);
     setQuery('');
     setResults([]);
-    navigate(`/boards/${result.boardId}?taskId=${result.id}`);
+    navigate(`/boards/${result.boardId}?taskId=${result.id}&projectId=${result.projectId}`);
   };
 
   const showDropdown = isOpen && query.trim().length > 0;

@@ -69,7 +69,7 @@ const ProjectCard = ({
         {project.boards.map((board) => (
           <div
             key={board.id}
-            onClick={() => navigate(`/boards/${board.id}`)}
+            onClick={() => navigate(`/boards/${board.id}?projectId=${project.id}`)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors group/board"
           >
             <div className="w-2 h-2 rounded-full bg-blue-400 group-hover/board:bg-blue-500 transition-colors" />
