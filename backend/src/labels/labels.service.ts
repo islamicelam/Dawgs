@@ -39,7 +39,7 @@ export class LabelsService {
   }
 
   async findAll(project: Project) {
-    return await this.labelRepo.findBy({ project });
+    return await this.labelRepo.findBy({ project: { id: project.id } });
   }
 
   async create(createLabelDto: CreateLabelDto, project: Project) {

@@ -94,7 +94,10 @@ export class BoardsService {
 
   async findOne(id: number, user: User): Promise<Board> {
     await this.ensureBoardAccess(id, user);
-    const board = await this.boardRepo.findOneBy({ id });
+    const board = await this.boardRepo.findOne({
+      where: { id },
+      relations: ['project'],
+    });
     if (!board) throw new NotFoundException('Board not found');
     return board;
   }
