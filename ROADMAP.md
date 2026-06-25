@@ -29,9 +29,10 @@ Each item names the **tech to adopt with it**.
 - [x] **Global search** — *done, overkill edition*: Elasticsearch 9 + Redis + BullMQ,
   transactional outbox, relay + worker, admin reindex, access-scoped `GET /search`
   (fuzziness + highlight), debounced header search UI
-- [ ] **Labels** — new entity, ManyToMany with Task (TypeORM relations, `@JoinTable`);
-  design already discussed: project-scoped, `labelIds` in task DTOs ← **next**
-- [ ] **Board filters** — assignee / type / priority / label (frontend state)
+- [x] **Labels** — project-scoped `Label` entity, ManyToMany with Task (`@JoinTable`),
+  `labelIds` in task DTOs; CRUD endpoints; frontend: picker in TaskModal, chips on
+  cards, filter by label, Labels management panel — PRs #12–#13
+- [ ] **Board filters** — assignee / type / priority / label (frontend state) ← **next**
 - [ ] **Notifications** — entity + triggers on @mentions / assignment (bell UI);
   reuse BullMQ queue infra for async fan-out
 
@@ -82,11 +83,12 @@ Introduce as features justify them:
 
 ## Current status
 
-- **Done:** priority/dueDate; CI; **Global Search end-to-end** (ES 9 + Redis + BullMQ +
-  outbox + worker + access-scoped endpoint + frontend UI) — PRs #6–#10
+- **Done:** priority/dueDate; CI; **Global Search** (ES 9 + Redis + BullMQ + outbox +
+  worker + access-scoped endpoint + frontend) — PRs #6–#10; **Labels** (project-scoped
+  CRUD + ManyToMany tasks + frontend picker/chips/filter/panel) — PRs #12–#13
 - **Tech adopted so far:** Elasticsearch, Redis, BullMQ (queues/workers),
-  transactional outbox pattern, GitHub Actions
-- **Next up:** Layer 1 → **Labels** (design agreed, ready to implement), then
-  **Board filters**, then **Notifications** (reuse BullMQ)
+  transactional outbox pattern, GitHub Actions, TypeORM ManyToMany relations
+- **Next up:** Layer 1 → **Board filters** (assignee/type/priority/label — mostly
+  frontend), then **Notifications** (BullMQ fan-out + bell UI)
 
 > Keep this file alive: tick boxes and update "Current status" after each feature.

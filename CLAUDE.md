@@ -22,31 +22,29 @@ let work pile up); always run lint+build+test locally before commit; branch off 
 PR → CI gates merge → delete branch after merge. Explain concepts junior-level when asked;
 give exact commands when the user asks "how do I...".
 
-## Current state (as of 2026-06-11)
+## Current state (as of 2026-06-24)
 
-**Global Search is DONE end-to-end** (PRs #6–#10), overkill-by-design: ES 9.4.2 + Redis
-in docker-compose; SearchModule (`backend/src/search/`) with `ensureIndex()` mapping;
-transactional outbox (`SearchOutbox`, same TX as task writes in TasksService); OutboxRelay
-(`@Interval(5000)` → BullMQ, `jobId: outbox-<id>`, attempts:3 + backoff); SearchProcessor
-(UPSERT: fetch task with relations `['board','board.project','status']` → `indexTask()`,
-doc `_id` = task.id, includes projectId; DELETE: `removeFromIndex()` swallows 404);
-`reindexAll()` + admin-only `POST /search/reindex`; `GET /search?q=` — multi_match
-`title^2`/`description`, `fuzziness: AUTO`, highlight, **access-scoped** (non-ADMIN
-filtered by `terms: {projectId: <user's project ids>}`, empty → `[]`); frontend header
-search with ~300ms debounce, highlight dropdown, navigation.
+**Labels is DONE end-to-end** (PRs #12–#13): `Label` entity (name, hex color
+`@Matches(/^#[0-9A-Fa-f]{6}$/)`), project-scoped (`@ManyToOne` Project), ManyToMany
+with Task (`@JoinTable` on Task side, junction `task_labels`); `labelIds?: number[]` in
+create/update task DTOs; CRUD endpoints (`GET/POST /projects/:id/labels`,
+`PATCH/DELETE /labels/:id`) with project-membership access checks; `'labels'` added to
+`findAll` and `findOne` relations in TasksService; `findAll` in LabelsService uses
+`findBy({ project: { id } })` (plain object doesn't work — must nest id); boards
+`findOne` now includes `relations: ['project']` so BoardPage gets projectId without URL
+params. Frontend: label picker in TaskModal (colored toggle pills), chips on task cards,
+label filter in filter bar, LabelsPanel CRUD modal with color picker, axios interceptor
+fixed (refresh-token queue pattern — single refresh for concurrent 401s).
 
-README/ROADMAP just updated for search. **ROADMAP.md is the plan of record — keep
-ticking it.**
+**Global Search is DONE** (PRs #6–#10) — see previous context for full details.
+
+**ROADMAP.md is the plan of record — keep ticking it.**
 
 **Next up (order agreed): Layer 1 finish:**
-1. **Labels** ← next. Design already agreed: `Label` entity (name, hex color validated
-   `@Matches(/^#[0-9A-Fa-f]{6}$/)`), project-scoped (`@ManyToOne` Project), ManyToMany
-   with Task (`@JoinTable` on Task side only), `labelIds?: number[]` in task DTOs,
-   CRUD endpoints with project-membership access checks, then frontend (Claude).
-   NB: when Task changes include labels, the existing search outbox already covers
-   reindexing.
-2. **Board filters** — assignee/type/priority/label; mostly frontend (Claude writes).
-3. **Notifications** — entity + triggers on @mentions/assignment; **reuse BullMQ** for
+1. **Board filters** ← next. Assignee/type/priority/label filters — mostly frontend
+   (Claude writes). Backend already has all data; just needs filter UI + query params
+   if server-side filtering is wanted (discuss first).
+2. **Notifications** — entity + triggers on @mentions/assignment; **reuse BullMQ** for
    async fan-out; bell UI. Email later (Layer 3).
 
 ## How to run / verify
@@ -71,6 +69,12 @@ frontend: `npm run lint && npm run build`. ES sanity:
 - Inside `manager.transaction()`, every write must go through `manager`, and
   `manager.save(plain-object)` needs the entity class: `manager.save(Task, payload)`
   (`as Task` cast doesn't survive runtime).
+- TypeORM `findBy({ relation: fullEntityObject })` does **not** filter correctly —
+  always use `findBy({ relation: { id: X } })` (nest the primary key explicitly).
+- TypeORM `ManyToOne` on Board/Label: `findOneBy` without `relations` doesn't return
+  the related entity — add `relations: ['project']` to `findOne` when you need it.
+- Axios parallel 401s → multiple refresh calls (race condition). Fix: shared
+  `isRefreshing` flag + queue of waiting promises (see `frontend/src/api/axios.ts`).
 - ES client major version must match server major (v9 client ↔ v9 server). After changing
   a dep version always `npm install` and commit the lock file (CI runs `npm ci`).
 - BullMQ custom `jobId` can't be a pure integer string → prefix (`outbox-3`).
