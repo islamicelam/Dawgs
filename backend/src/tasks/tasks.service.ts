@@ -13,12 +13,14 @@ import { randomUUID } from 'crypto';
 import { Board } from 'src/boards/boards.entity';
 import { Project } from 'src/projects/projects.entity';
 import { SearchOutbox } from 'src/search/search-outbox.entity';
+import { BoardGateway } from 'src/boards/board.gateway';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectRepository(Task)
     private taskRepo: Repository<Task>,
+    private boardGateway: BoardGateway,
   ) {}
 
   private getMentions(text?: string): string[] {
@@ -63,67 +65,78 @@ export class TasksService {
     boardId: number,
     user: User,
   ): Promise<Task> {
-    await this.ensureBoardAccess(boardId, user);
+    {
+      await this.ensureBoardAccess(boardId, user);
 
-    const {
-      assignId,
-      statusId,
-      description,
-      linkedTaskIds,
-      subtasks,
-      parentEpicId,
-      parentStoryId,
-      priority,
-      dueDate,
-      labelIds,
-      ...rest
-    } = createTaskDto;
+      const {
+        assignId,
+        statusId,
+        description,
+        linkedTaskIds,
+        subtasks,
+        parentEpicId,
+        parentStoryId,
+        priority,
+        dueDate,
+        labelIds,
+        ...rest
+      } = createTaskDto;
 
-    if (rest.type === 'EPIC' && (parentEpicId || parentStoryId)) {
-      throw new BadRequestException('Epic cannot have a parent');
-    }
-    if (rest.type === 'USER_STORY' && parentStoryId) {
-      throw new BadRequestException('User Story cannot have a parent Story');
-    }
-    if (rest.type === 'TASK' && parentEpicId && parentStoryId) {
-      throw new BadRequestException(
-        'Task cannot have both a parent Epic and a parent Story',
-      );
-    }
+      if (rest.type === 'EPIC' && (parentEpicId || parentStoryId)) {
+        throw new BadRequestException('Epic cannot have a parent');
+      }
+      if (rest.type === 'USER_STORY' && parentStoryId) {
+        throw new BadRequestException('User Story cannot have a parent Story');
+      }
+      if (rest.type === 'TASK' && parentEpicId && parentStoryId) {
+        throw new BadRequestException(
+          'Task cannot have both a parent Epic and a parent Story',
+        );
+      }
 
-    const max = await this.taskRepo
-      .createQueryBuilder('task')
-      .where('task.boardId = :boardId', { boardId })
-      .andWhere('task.statusId = :statusId', { statusId: statusId ?? null })
-      .select('COALESCE(MAX(task.order), -1)', 'max')
-      .getRawOne<{ max: string }>();
+      const max = await this.taskRepo
+        .createQueryBuilder('task')
+        .where('task.boardId = :boardId', { boardId })
+        .andWhere('task.statusId = :statusId', { statusId: statusId ?? null })
+        .select('COALESCE(MAX(task.order), -1)', 'max')
+        .getRawOne<{ max: string }>();
 
-    const task = this.taskRepo.create({
-      ...rest,
-      description,
-      order: Number(max?.max ?? -1) + 1,
-      board: { id: boardId },
-      assign: assignId ? { id: assignId } : undefined,
-      status: statusId ? { id: statusId } : undefined,
-      linkedTaskIds: linkedTaskIds ?? [],
-      subtasks: subtasks ?? [],
-      comments: [],
-      history: [this.history('Task created', user)],
-      descriptionMentions: this.getMentions(description),
-      parentEpic: parentEpicId ? { id: parentEpicId } : undefined,
-      parentStory: parentStoryId ? { id: parentStoryId } : undefined,
-      priority: priority ?? 'MEDIUM',
-      dueDate: dueDate ?? undefined,
-      labels: labelIds ? labelIds.map((id) => ({ id })) : [],
-    });
-    return await this.taskRepo.manager.transaction(async (manager) => {
-      const saved = await manager.save(task);
-      await manager.save(SearchOutbox, {
-        aggregateId: saved.id,
-        operation: 'UPSERT',
+      const task = this.taskRepo.create({
+        ...rest,
+        description,
+        order: Number(max?.max ?? -1) + 1,
+        board: { id: boardId },
+        assign: assignId ? { id: assignId } : undefined,
+        status: statusId ? { id: statusId } : undefined,
+        linkedTaskIds: linkedTaskIds ?? [],
+        subtasks: subtasks ?? [],
+        comments: [],
+        history: [this.history('Task created', user)],
+        descriptionMentions: this.getMentions(description),
+        parentEpic: parentEpicId ? { id: parentEpicId } : undefined,
+        parentStory: parentStoryId ? { id: parentStoryId } : undefined,
+        priority: priority ?? 'MEDIUM',
+        dueDate: dueDate ?? undefined,
+        labels: labelIds ? labelIds.map((id) => ({ id })) : [],
       });
+
+      const board = await this.taskRepo.manager.getRepository(Board).findOne({
+        where: { id: boardId },
+        relations: ['project'],
+      });
+      if (!board) throw new NotFoundException('Board not found');
+
+      const saved = await this.taskRepo.manager.transaction(async (manager) => {
+        const saved = await manager.save(task);
+        await manager.save(SearchOutbox, {
+          aggregateId: saved.id,
+          operation: 'UPSERT',
+        });
+        return saved;
+      });
+      this.boardGateway.emitToProject(board.project.id, 'task.created', saved);
       return saved;
-    });
+    }
   }
 
   async findAll(boardId: number, user: User): Promise<Task[]> {
@@ -171,13 +184,16 @@ export class TasksService {
   }
 
   async remove(id: number, user: User): Promise<void> {
-    await this.findOne(id, user);
+    const task = await this.findOne(id, user);
     await this.taskRepo.manager.transaction(async (manager) => {
       await manager.delete(Task, id);
       await manager.save(SearchOutbox, {
         aggregateId: id,
         operation: 'DELETE',
       });
+    });
+    this.boardGateway.emitToProject(task.board.project.id, 'task.deleted', {
+      id,
     });
   }
 
@@ -245,7 +261,7 @@ export class TasksService {
       labels: labelIds ? labelIds.map((id) => ({ id })) : task.labels,
     } as Task;
 
-    return this.taskRepo.manager.transaction(async (manager) => {
+    const saved = await this.taskRepo.manager.transaction(async (manager) => {
       const saved = await manager.save(Task, payload);
       await manager.save(SearchOutbox, {
         aggregateId: saved.id,
@@ -253,6 +269,12 @@ export class TasksService {
       });
       return saved;
     });
+    this.boardGateway.emitToProject(
+      task.board.project.id,
+      'task.updated',
+      saved,
+    );
+    return saved;
   }
 
   async reorder(taskIds: number[], user: User): Promise<void> {
@@ -273,6 +295,9 @@ export class TasksService {
       toSave.push(task);
     });
     if (toSave.length > 0) await this.taskRepo.save(toSave);
+    this.boardGateway.emitToProject(first.board.project.id, 'task.reordered', {
+      taskIds,
+    });
   }
 
   async addComment(id: number, text: string, user: User): Promise<Task> {
@@ -293,6 +318,12 @@ export class TasksService {
       ...(task.history ?? []),
       this.history('Comment added', user),
     ];
-    return this.taskRepo.save(task);
+    const saved = await this.taskRepo.save(task);
+    this.boardGateway.emitToProject(
+      task.board.project.id,
+      'task.updated',
+      saved,
+    );
+    return saved;
   }
 }

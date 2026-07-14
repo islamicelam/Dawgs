@@ -5,6 +5,7 @@ import { Task } from './tasks.entity';
 import { Test } from '@nestjs/testing';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { BoardGateway } from 'src/boards/board.gateway';
 
 describe('TasksService - priority & dueDate', () => {
   let tasksService: TasksService;
@@ -25,13 +26,20 @@ describe('TasksService - priority & dueDate', () => {
       delete: jest.fn(),
     };
 
+    const boardRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 1, project: { id: 1 } }),
+    };
+
     repo = {
       createQueryBuilder: jest.fn().mockReturnValue(qb),
       create: jest.fn((x) => x),
       save: jest.fn((x) => Promise.resolve(x)),
-      findOne: jest.fn().mockResolvedValue({}),
+      findOne: jest
+        .fn()
+        .mockResolvedValue({ board: { id: 1, project: { id: 1 } } }),
       manager: {
         transaction: jest.fn((cb) => cb(manager)),
+        getRepository: jest.fn().mockReturnValue(boardRepo),
       },
     } as any;
 
@@ -39,6 +47,7 @@ describe('TasksService - priority & dueDate', () => {
       providers: [
         TasksService,
         { provide: getRepositoryToken(Task), useValue: repo },
+        { provide: BoardGateway, useValue: { emitToProject: jest.fn() } },
       ],
     }).compile();
 
