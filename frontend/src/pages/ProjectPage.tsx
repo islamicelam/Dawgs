@@ -14,6 +14,7 @@ import Header from '../components/Header';
 import ProjectCard from '../components/project/ProjectCard';
 import ProjectFormModal from '../components/project/ProjectFormModal';
 import ConfirmModal from '../components/common/ConfirmModal';
+import { BUTTON_PRIMARY_CLS, GHOST_ICON_BUTTON_CLS } from '../constants/ui';
 
 const ProjectsPage = () => {
   const me = JSON.parse(localStorage.getItem('me') ?? 'null') as {
@@ -38,7 +39,7 @@ const ProjectsPage = () => {
     setProjects(projectsRes.data);
     setAllUsers(usersRes.data);
   };
-  
+
   useEffect(() => {
     void (async () => {
       try {
@@ -48,7 +49,7 @@ const ProjectsPage = () => {
       }
     })();
   }, []);
-  
+
   const handleToggleShare = async (
     projectId: number,
     userId: number,
@@ -91,25 +92,29 @@ const ProjectsPage = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-400 text-sm tracking-widest uppercase">
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-neutral-400 dark:text-neutral-500 text-sm tracking-widest uppercase">
           Loading...
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fuchsia-100 via-cyan-100 to-amber-100">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <Header />
 
-      <div className="bg-white/80 backdrop-blur border-b border-indigo-100 px-4 lg:px-6 py-4 flex items-center justify-between">
+      <div className="bg-white/70 dark:bg-neutral-900/40 backdrop-blur border-b border-neutral-200 dark:border-neutral-800 px-4 lg:px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-800">Projects</h1>
-          <p className="text-sm text-slate-400">{projects.length} projects</p>
+          <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+            Projects
+          </h1>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+            {projects.length} projects
+          </p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-700 transition-colors"
+          className={`${BUTTON_PRIMARY_CLS} text-sm`}
         >
           + New project
         </button>
@@ -153,15 +158,21 @@ const ProjectsPage = () => {
       )}
 
       {sharingProject && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-[520px] max-h-[80vh] overflow-y-auto shadow-2xl">
+        <div
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-[2px] flex items-center justify-center z-50 animate-fade-in"
+          onClick={() => setSharingProject(null)}
+        >
+          <div
+            className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 w-[520px] max-h-[80vh] overflow-y-auto shadow-xl shadow-black/10 dark:shadow-black/40 animate-modal-in"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
                 Share "{sharingProject.name}"
               </h2>
               <button
                 onClick={() => setSharingProject(null)}
-                className="text-slate-400"
+                className={GHOST_ICON_BUTTON_CLS}
               >
                 ✕
               </button>
@@ -174,9 +185,9 @@ const ProjectsPage = () => {
                 return (
                   <label
                     key={user.id}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2"
+                    className="flex items-center justify-between rounded-md border border-neutral-200 dark:border-neutral-800 px-3 py-2"
                   >
-                    <span className="text-sm text-slate-700">
+                    <span className="text-sm text-neutral-700 dark:text-neutral-300">
                       {user.name} ({user.email})
                     </span>
                     <input
@@ -185,6 +196,7 @@ const ProjectsPage = () => {
                       onChange={() =>
                         handleToggleShare(sharingProject.id, user.id, shared)
                       }
+                      className="accent-indigo-600"
                     />
                   </label>
                 );

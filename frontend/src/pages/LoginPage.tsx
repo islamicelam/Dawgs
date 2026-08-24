@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { getMe, login, register } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
+import { BUTTON_PRIMARY_CLS, INPUT_CLS } from '../constants/ui';
 
 const LoginPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -42,9 +44,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 w-96">
-        <h1 className="text-xl font-semibold text-slate-800 mb-6">
+    <div className="relative flex items-center justify-center min-h-screen bg-neutral-50 dark:bg-neutral-950">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="bg-white dark:bg-neutral-900 p-8 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 w-96">
+        <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-6">
           {isRegister ? 'Create account' : 'Log in'}
         </h1>
 
@@ -54,7 +59,7 @@ const LoginPage = () => {
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+            className={`${INPUT_CLS} mb-3`}
           />
         )}
 
@@ -63,7 +68,7 @@ const LoginPage = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+          className={`${INPUT_CLS} mb-3`}
         />
 
         <input
@@ -71,7 +76,7 @@ const LoginPage = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+          className={`${INPUT_CLS} mb-3`}
         />
 
         {isRegister && (
@@ -80,27 +85,28 @@ const LoginPage = () => {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+            className={`${INPUT_CLS} mb-3`}
           />
         )}
 
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+        {error && (
+          <p className="text-red-500 dark:text-red-400 text-sm mb-3">
+            {error}
+          </p>
+        )}
 
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-slate-800 text-white rounded-lg py-2 text-sm hover:bg-slate-700 transition-colors mb-3"
-        >
+        <button onClick={handleSubmit} className={`w-full ${BUTTON_PRIMARY_CLS} mb-3`}>
           {isRegister ? 'Create account' : 'Login'}
         </button>
 
-        <p className="text-center text-sm text-slate-400">
+        <p className="text-center text-sm text-neutral-400 dark:text-neutral-500">
           {isRegister ? 'Already have an account?' : "Don't have an account?"}
           <button
             onClick={() => {
               setIsRegister(!isRegister);
               setError('');
             }}
-            className="text-blue-500 hover:text-blue-600 ml-1 transition-colors"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 ml-1 transition-colors"
           >
             {isRegister ? 'Log in' : 'Register'}
           </button>
