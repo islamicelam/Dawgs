@@ -1,3 +1,8 @@
+export interface PresenceUser {
+  userId: number;
+  name: string;
+}
+
 export interface Label {
   id: number;
   name: string;

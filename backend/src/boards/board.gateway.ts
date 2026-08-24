@@ -14,7 +14,10 @@ interface PresenceUser {
 }
 
 @WebSocketGateway({
-  cors: { origin: '*' },
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+  },
   namespace: '/board',
 })
 export class BoardGateway implements OnGatewayDisconnect {
