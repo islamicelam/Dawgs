@@ -26,7 +26,10 @@ const HighlightText = ({
     if (!part) return;
     nodes.push(
       highlighting ? (
-        <mark key={i} className="bg-amber-200 text-slate-900 rounded-sm">
+        <mark
+          key={i}
+          className="bg-amber-200 dark:bg-amber-500/30 text-neutral-900 dark:text-amber-100 rounded-sm"
+        >
           {part}
         </mark>
       ) : (

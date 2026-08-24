@@ -36,6 +36,12 @@ import BoardFormModal from '../components/board/BoardFormModal';
 import ConfirmModal from '../components/common/ConfirmModal';
 import Modal from '../components/common/Modal';
 import LabelsPanel from '../components/labels/LabelsPanel';
+import {
+  BUTTON_PRIMARY_CLS,
+  BUTTON_SECONDARY_CLS,
+  GHOST_ICON_BUTTON_CLS,
+  INPUT_CLS,
+} from '../constants/ui';
 
 const BoardPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -269,49 +275,49 @@ const BoardPage = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-400 text-sm tracking-widest uppercase">
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
+        <div className="text-neutral-400 dark:text-neutral-500 text-sm tracking-widest uppercase">
           Loading...
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-amber-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <Header />
 
-      <div className="bg-white/80 backdrop-blur border-b border-violet-100 px-8 py-4 flex items-center justify-between">
+      <div className="bg-white/70 dark:bg-neutral-900/40 backdrop-blur border-b border-neutral-200 dark:border-neutral-800 px-6 py-3.5 flex items-center justify-between gap-4">
         <button
           onClick={() => navigate('/projects')}
-          className="text-slate-400 hover:text-slate-600 text-sm transition-colors"
+          className="text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 text-sm transition-colors shrink-0"
         >
           ← Projects
         </button>
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-slate-800">
+        <div className="flex flex-col items-center min-w-0">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 truncate">
               {board?.name}
             </h1>
             <button
               onClick={() => setIsEditBoardOpen(true)}
-              className="text-slate-300 hover:text-slate-600 transition-colors"
+              className={`${GHOST_ICON_BUTTON_CLS} text-sm`}
             >
               ✏️
             </button>
             {canDelete && (
               <button
                 onClick={() => setIsDeleteBoardOpen(true)}
-                className="text-slate-300 hover:text-red-500 transition-colors"
+                className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 transition-colors text-sm"
               >
                 🗑️
               </button>
             )}
           </div>
-          <p className="text-sm text-slate-400">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
             {statuses.length} columns · {tasks.length} tasks
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {presenceUsers.length > 0 && (
             <div className="flex items-center -space-x-2">
               {presenceUsers
@@ -324,7 +330,7 @@ const BoardPage = () => {
                   <div
                     key={u.userId}
                     title={u.name}
-                    className="w-8 h-8 rounded-full bg-violet-500 text-white text-xs font-semibold flex items-center justify-center border-2 border-white shadow-sm"
+                    className="w-7 h-7 rounded-full bg-indigo-500 text-white text-[10px] font-semibold flex items-center justify-center border-2 border-white dark:border-neutral-900 shadow-sm"
                   >
                     {u.name.slice(0, 2).toUpperCase()}
                   </div>
@@ -333,21 +339,23 @@ const BoardPage = () => {
           )}
           <button
             onClick={() => setIsStatusModalOpen(true)}
-            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-700 transition-colors"
+            className={`${BUTTON_PRIMARY_CLS} text-sm`}
           >
             + Add column
           </button>
         </div>
       </div>
 
-      <div className="px-4 lg:px-6 pt-4 flex items-center gap-3 flex-wrap">
-        <span className="text-sm text-slate-500">Filter by:</span>
+      <div className="px-4 lg:px-6 pt-3.5 flex items-center gap-2.5 flex-wrap">
+        <span className="text-xs font-medium text-neutral-400 dark:text-neutral-500">
+          Filter
+        </span>
         <select
           value={filterAssignId}
           onChange={(e) =>
             setFilterAssignId(e.target.value ? Number(e.target.value) : '')
           }
-          className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+          className={`${INPUT_CLS} w-auto py-1.5 text-xs`}
         >
           <option value="">All assignees</option>
           {users.map((u) => (
@@ -362,7 +370,7 @@ const BoardPage = () => {
             onChange={(e) =>
               setFilterLabelId(e.target.value ? Number(e.target.value) : '')
             }
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+            className={`${INPUT_CLS} w-auto py-1.5 text-xs`}
           >
             <option value="">All labels</option>
             {labels.map((l) => (
@@ -374,10 +382,10 @@ const BoardPage = () => {
         )}
         {filterLabelId !== '' && (
           <span
-            className="text-xs px-2.5 py-1 rounded-full text-white font-medium"
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full text-white font-medium"
             style={{
               background:
-                labels.find((l) => l.id === filterLabelId)?.color ?? '#94a3b8',
+                labels.find((l) => l.id === filterLabelId)?.color ?? '#a1a1aa',
             }}
           >
             {labels.find((l) => l.id === filterLabelId)?.name}
@@ -387,7 +395,7 @@ const BoardPage = () => {
           {projectId !== null && (
             <button
               onClick={() => setIsLabelsPanelOpen(true)}
-              className="text-sm text-slate-500 hover:text-slate-800 border border-slate-200 rounded-lg px-3 py-1.5 transition-colors hover:border-slate-300"
+              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 border border-neutral-200 dark:border-neutral-800 rounded-md px-3 py-1.5 transition-colors hover:border-neutral-300 dark:hover:border-neutral-700"
             >
               🏷 Labels
             </button>
@@ -406,7 +414,7 @@ const BoardPage = () => {
           items={statuses.map((s) => `col-${s.id}`)}
           strategy={horizontalListSortingStrategy}
         >
-          <div className="p-4 lg:p-6 flex gap-5 overflow-x-auto">
+          <div className="p-4 lg:p-6 flex gap-4 overflow-x-auto items-start">
             {statuses.map((status) => (
               <SortableColumn
                 key={status.id}
@@ -440,8 +448,8 @@ const BoardPage = () => {
 
         <DragOverlay>
           {activeTask && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 shadow-xl w-72">
-              <p className="text-sm text-slate-700 font-medium">
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-3 shadow-xl w-72">
+              <p className="text-sm text-neutral-800 dark:text-neutral-100 font-medium">
                 {activeTask.title}
               </p>
             </div>
@@ -473,7 +481,7 @@ const BoardPage = () => {
 
       {isStatusModalOpen && (
         <Modal onClose={() => setIsStatusModalOpen(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
             Add column
           </h2>
           <input
@@ -481,12 +489,12 @@ const BoardPage = () => {
             placeholder="Column name"
             value={newStatusName}
             onChange={(e) => setNewStatusName(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+            className={`${INPUT_CLS} mb-3`}
           />
           <select
             value={newStatusCategory}
             onChange={(e) => setNewStatusCategory(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none"
+            className={`${INPUT_CLS} mb-4`}
           >
             <option value="TODO">Todo</option>
             <option value="IN_PROGRESS">In Progress</option>
@@ -495,13 +503,13 @@ const BoardPage = () => {
           <div className="flex gap-2">
             <button
               onClick={handleCreateStatus}
-              className="flex-1 bg-slate-800 text-white rounded-lg py-2 text-sm hover:bg-slate-700 transition-colors"
+              className={`flex-1 ${BUTTON_PRIMARY_CLS}`}
             >
               Create
             </button>
             <button
               onClick={() => setIsStatusModalOpen(false)}
-              className="flex-1 bg-slate-100 text-slate-500 rounded-lg py-2 text-sm hover:bg-slate-200 transition-colors"
+              className={`flex-1 ${BUTTON_SECONDARY_CLS}`}
             >
               Cancel
             </button>

@@ -9,17 +9,23 @@ import { CSS } from '@dnd-kit/utilities';
 import SortableTask from './SortableTask';
 import ConfirmModal from '../common/ConfirmModal';
 import Modal from '../common/Modal';
+import {
+  BUTTON_PRIMARY_CLS,
+  BUTTON_SECONDARY_CLS,
+  GHOST_ICON_BUTTON_CLS,
+  INPUT_CLS,
+} from '../../constants/ui';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  TODO: 'border-t-slate-400',
-  IN_PROGRESS: 'border-t-blue-500',
-  DONE: 'border-t-emerald-500',
+const CATEGORY_DOT: Record<string, string> = {
+  TODO: 'bg-neutral-400 dark:bg-neutral-500',
+  IN_PROGRESS: 'bg-sky-500',
+  DONE: 'bg-emerald-500',
 };
 
 const CATEGORY_BADGE: Record<string, string> = {
-  TODO: 'bg-slate-100 text-slate-600',
-  IN_PROGRESS: 'bg-blue-100 text-blue-700',
-  DONE: 'bg-emerald-100 text-emerald-700',
+  TODO: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400',
+  IN_PROGRESS: 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400',
+  DONE: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
 };
 
 const SortableColumn = ({
@@ -78,29 +84,34 @@ const SortableColumn = ({
       <div
         ref={setNodeRef}
         style={style}
-        className={`flex-shrink-0 w-72 bg-white rounded-xl shadow-sm border-t-4 ${CATEGORY_COLORS[status.category] || 'border-t-slate-300'}`}
+        className="flex-shrink-0 w-72 bg-neutral-100/60 dark:bg-neutral-900/60 rounded-lg border border-neutral-200/80 dark:border-neutral-800/80"
       >
         <div
           {...attributes}
           {...listeners}
-          className="p-4 border-b border-slate-100 flex items-center justify-between cursor-grab active:cursor-grabbing group"
+          className="px-3.5 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing group"
         >
           <div className="flex items-center gap-2">
-            <span className="font-medium text-slate-700">{status.name}</span>
             <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${CATEGORY_BADGE[status.category]}`}
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${CATEGORY_DOT[status.category] || 'bg-neutral-300'}`}
+            />
+            <span className="font-medium text-sm text-neutral-700 dark:text-neutral-200">
+              {status.name}
+            </span>
+            <span
+              className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium ${CATEGORY_BADGE[status.category]}`}
             >
               {tasks.length}
             </span>
           </div>
-          <div className="hidden group-hover:flex gap-1">
+          <div className="hidden group-hover:flex gap-0.5">
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsEditOpen(true);
               }}
-              className="text-slate-300 hover:text-slate-600 transition-colors text-sm px-1"
+              className={`${GHOST_ICON_BUTTON_CLS} text-xs px-1.5 py-1 rounded`}
             >
               ✏️
             </button>
@@ -110,7 +121,7 @@ const SortableColumn = ({
                 e.stopPropagation();
                 setIsDeleteOpen(true);
               }}
-              className="text-slate-300 hover:text-red-500 transition-colors text-sm px-1"
+              className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 transition-colors text-xs px-1.5 py-1 rounded"
             >
               🗑️
             </button>
@@ -121,7 +132,7 @@ const SortableColumn = ({
           items={tasks.map((t) => `task-${t.id}`)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="p-3 flex flex-col gap-2 min-h-24">
+          <div className="px-2.5 pb-2 flex flex-col gap-2 min-h-24">
             {tasks.map((task) => (
               <SortableTask
                 key={task.id}
@@ -134,9 +145,9 @@ const SortableColumn = ({
           </div>
         </SortableContext>
 
-        <div className="p-3 border-t border-slate-100">
+        <div className="px-2.5 pb-2.5">
           {addingTaskToStatus === status.id ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-2">
               <input
                 autoFocus
                 type="text"
@@ -146,18 +157,18 @@ const SortableColumn = ({
                 onKeyDown={(e) =>
                   e.key === 'Enter' && handleCreateTask(status.id)
                 }
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                className="w-full bg-transparent text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none"
               />
               <div className="flex gap-2">
                 <button
                   onClick={() => handleCreateTask(status.id)}
-                  className="flex-1 bg-slate-800 text-white rounded-lg py-1.5 text-xs hover:bg-slate-700 transition-colors"
+                  className={`flex-1 ${BUTTON_PRIMARY_CLS} py-1.5 text-xs`}
                 >
                   Add
                 </button>
                 <button
                   onClick={() => setAddingTaskToStatus(null)}
-                  className="flex-1 bg-slate-100 text-slate-500 rounded-lg py-1.5 text-xs hover:bg-slate-200 transition-colors"
+                  className={`flex-1 ${BUTTON_SECONDARY_CLS} py-1.5 text-xs`}
                 >
                   Cancel
                 </button>
@@ -166,7 +177,7 @@ const SortableColumn = ({
           ) : (
             <button
               onClick={() => setAddingTaskToStatus(status.id)}
-              className="w-full text-left text-sm text-slate-400 hover:text-slate-600 transition-colors py-1"
+              className="w-full text-left text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-white dark:hover:bg-neutral-900 rounded-md transition-colors py-1.5 px-2 -mx-0"
             >
               + Add task
             </button>
@@ -176,34 +187,31 @@ const SortableColumn = ({
 
       {isEditOpen && (
         <Modal onClose={() => setIsEditOpen(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
             Edit column
           </h2>
           <input
             type="text"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-blue-400"
+            className={`${INPUT_CLS} mb-3`}
           />
           <select
             value={editCategory}
             onChange={(e) => setEditCategory(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none"
+            className={`${INPUT_CLS} mb-4`}
           >
             <option value="TODO">Todo</option>
             <option value="IN_PROGRESS">In Progress</option>
             <option value="DONE">Done</option>
           </select>
           <div className="flex gap-2">
-            <button
-              onClick={handleEdit}
-              className="flex-1 bg-slate-800 text-white rounded-lg py-2 text-sm hover:bg-slate-700 transition-colors"
-            >
+            <button onClick={handleEdit} className={`flex-1 ${BUTTON_PRIMARY_CLS}`}>
               Save
             </button>
             <button
               onClick={() => setIsEditOpen(false)}
-              className="flex-1 bg-slate-100 text-slate-500 rounded-lg py-2 text-sm hover:bg-slate-200 transition-colors"
+              className={`flex-1 ${BUTTON_SECONDARY_CLS}`}
             >
               Cancel
             </button>
