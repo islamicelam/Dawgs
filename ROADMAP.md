@@ -44,8 +44,13 @@ Each item names the **tech to adopt with it**.
 - [ ] AI **auto-classify** task type (bug / feature / chore)
 
 ### Layer 3 — Collaboration (real-time)
-- [ ] **WebSockets** (NestJS Gateways / Socket.IO) — live board updates
-- [ ] **Presence** ("Alice is viewing this task") — **Redis** pub/sub
+- [x] **WebSockets** (NestJS Gateway / Socket.IO, `/board` namespace) — live board
+  updates: `task.created/updated/deleted/reordered` broadcast to all clients in a
+  project room, `WsJwtGuard` verifies JWT from the httpOnly cookie on handshake
+- [x] **Presence** ("who's viewing this board") — in-memory per-gateway
+  `Map<projectId, Map<socketId, PresenceUser>>` (no Redis pub/sub yet — single
+  backend instance; upgrade path is `@socket.io/redis-adapter` if we scale out);
+  frontend shows deduped avatar pills in the board header
 - [ ] **Email notifications** — **BullMQ + Redis** queue + **Nodemailer / Resend**
 - [ ] Project **activity feed**
 
@@ -81,14 +86,18 @@ Introduce as features justify them:
 
 ---
 
-## Current status
+## Current status (as of 2026-08-24)
 
 - **Done:** priority/dueDate; CI; **Global Search** (ES 9 + Redis + BullMQ + outbox +
   worker + access-scoped endpoint + frontend) — PRs #6–#10; **Labels** (project-scoped
-  CRUD + ManyToMany tasks + frontend picker/chips/filter/panel) — PRs #12–#13
+  CRUD + ManyToMany tasks + frontend picker/chips/filter/panel) — PRs #12–#13;
+  **WebSockets + Presence** (`BoardGateway`, `WsJwtGuard`, live task events, presence
+  avatars) — PR #15
 - **Tech adopted so far:** Elasticsearch, Redis, BullMQ (queues/workers),
-  transactional outbox pattern, GitHub Actions, TypeORM ManyToMany relations
+  transactional outbox pattern, GitHub Actions, TypeORM ManyToMany relations,
+  Socket.IO / NestJS Gateways
 - **Next up:** Layer 1 → **Board filters** (assignee/type/priority/label — mostly
-  frontend), then **Notifications** (BullMQ fan-out + bell UI)
+  frontend), then **Notifications** (BullMQ fan-out + bell UI, can now also push
+  live via the existing `BoardGateway` instead of only polling)
 
 > Keep this file alive: tick boxes and update "Current status" after each feature.

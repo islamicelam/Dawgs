@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchTasks } from '../api/search';
 import { useDebounce } from '../hooks/useDebounce';
-import { PRIORITY_BADGE, PRIORITY_LABEL } from '../constants/task';
+import PriorityBadge from './common/PriorityBadge';
 import type { SearchResult } from '../types';
 import HighlightText from './common/HighlightText';
 
@@ -54,39 +54,58 @@ const SearchBar = () => {
     setIsOpen(false);
     setQuery('');
     setResults([]);
-    navigate(`/boards/${result.boardId}?taskId=${result.id}&projectId=${result.projectId}`);
+    navigate(
+      `/boards/${result.boardId}?taskId=${result.id}&projectId=${result.projectId}`,
+    );
   };
 
   const showDropdown = isOpen && query.trim().length > 0;
 
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setIsOpen(true);
-        }}
-        onFocus={() => setIsOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            setIsOpen(false);
-            e.currentTarget.blur();
-          }
-        }}
-        placeholder="Search tasks..."
-        className="w-full bg-slate-800 text-white placeholder-slate-400 text-sm rounded-lg px-3 py-1.5 border border-slate-700 focus:outline-none focus:border-slate-400"
-      />
+      <div className="relative">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 pointer-events-none"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path strokeLinecap="round" d="M21 21l-4.3-4.3" />
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setIsOpen(false);
+              e.currentTarget.blur();
+            }
+          }}
+          placeholder="Search tasks..."
+          className="w-full bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-500 text-sm rounded-md pl-8 pr-3 py-1.5 border border-transparent focus:outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-neutral-900 focus:ring-2 focus:ring-indigo-500/25 transition-colors"
+        />
+      </div>
 
       {showDropdown && (
-        <div className="absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-xl border border-slate-200 max-h-96 overflow-y-auto z-50">
+        <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-neutral-900 rounded-lg shadow-xl shadow-black/10 dark:shadow-black/40 border border-neutral-200 dark:border-neutral-800 max-h-96 overflow-y-auto z-50 animate-modal-in">
           {loading && (
-            <div className="px-4 py-3 text-sm text-slate-400">Searching...</div>
+            <div className="px-4 py-3 text-sm text-neutral-400 dark:text-neutral-500">
+              Searching...
+            </div>
           )}
 
           {!loading && results.length === 0 && (
-            <div className="px-4 py-3 text-sm text-slate-400">No results</div>
+            <div className="px-4 py-3 text-sm text-neutral-400 dark:text-neutral-500">
+              No results
+            </div>
           )}
 
           {!loading &&
@@ -94,23 +113,20 @@ const SearchBar = () => {
               <button
                 key={result.id}
                 onClick={() => handleSelect(result)}
-                className="w-full text-left px-4 py-2.5 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                className="w-full text-left px-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-800 border-b border-neutral-100 dark:border-neutral-800 last:border-b-0 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-slate-800 truncate">
+                  <p className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">
                     <HighlightText
                       fragment={result.highlight?.title?.[0]}
                       fallback={result.title}
                     />
                   </p>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${PRIORITY_BADGE[result.priority]}`}
-                  >
-                    {PRIORITY_LABEL[result.priority]}
-                  </span>
+                  <PriorityBadge priority={result.priority} />
                 </div>
-                {(result.highlight?.description?.[0] ?? result.description) && (
-                  <p className="text-xs text-slate-500 mt-0.5 truncate">
+                {(result.highlight?.description?.[0] ??
+                  result.description) && (
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">
                     <HighlightText
                       fragment={result.highlight?.description?.[0]}
                       fallback={result.description}
@@ -118,7 +134,9 @@ const SearchBar = () => {
                   </p>
                 )}
                 {result.status && (
-                  <p className="text-xs text-slate-400 mt-1">{result.status}</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
+                    {result.status}
+                  </p>
                 )}
               </button>
             ))}
