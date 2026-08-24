@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import type { Project } from "../../types";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Project } from '../../types';
+import { BUTTON_SECONDARY_CLS, INPUT_CLS } from '../../constants/ui';
 
 const ProjectCard = ({
   project,
@@ -19,61 +20,67 @@ const ProjectCard = ({
 }) => {
   const navigate = useNavigate();
   const [isAddingBoard, setIsAddingBoard] = useState(false);
-  const [newBoardName, setNewBoardName] = useState("");
+  const [newBoardName, setNewBoardName] = useState('');
 
   const handleAddBoard = () => {
     if (!newBoardName.trim()) return;
     onAddBoard(project.id, newBoardName);
-    setNewBoardName("");
+    setNewBoardName('');
     setIsAddingBoard(false);
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group">
-      <div className="p-5 border-b border-slate-100 flex items-start justify-between">
-        <div>
-          <h2 className="font-semibold text-slate-800">{project.name}</h2>
-          <p className="text-sm text-slate-400 mt-1">{project.description}</p>
+    <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden group hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors">
+      <div className="p-4 border-b border-neutral-100 dark:border-neutral-800 flex items-start justify-between">
+        <div className="min-w-0">
+          <h2 className="font-medium text-sm text-neutral-900 dark:text-neutral-100 truncate">
+            {project.name}
+          </h2>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5 truncate">
+            {project.description}
+          </p>
         </div>
-        <div className="hidden group-hover:flex gap-1 ml-2">
+        <div className="hidden group-hover:flex gap-0.5 ml-2 shrink-0">
           <button
             onClick={() => onEdit(project)}
-            className="text-slate-300 hover:text-slate-600 text-sm px-1 transition-colors"
+            className="text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 text-sm px-1 transition-colors"
           >
             ✏️
           </button>
           <button
             onClick={() => onManageShare(project)}
-            className="text-slate-300 hover:text-violet-600 text-sm px-1 transition-colors"
+            className="text-neutral-400 hover:text-indigo-600 dark:text-neutral-500 dark:hover:text-indigo-400 text-sm px-1 transition-colors"
             title="Share project"
           >
             👥
           </button>
           {canDelete && (
             <button
-            onClick={() => onDelete(project.id)}
-            className="text-slate-300 hover:text-red-500 text-sm px-1 transition-colors"
-          >
-            🗑️
-          </button>
+              onClick={() => onDelete(project.id)}
+              className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 text-sm px-1 transition-colors"
+            >
+              🗑️
+            </button>
           )}
         </div>
       </div>
 
-      <div className="p-3 flex flex-col gap-2">
+      <div className="p-2.5 flex flex-col gap-1.5">
         {project.boards.length === 0 && (
-          <p className="text-xs text-slate-300 text-center py-2">
+          <p className="text-xs text-neutral-300 dark:text-neutral-600 text-center py-2">
             No boards yet
           </p>
         )}
         {project.boards.map((board) => (
           <div
             key={board.id}
-            onClick={() => navigate(`/boards/${board.id}?projectId=${project.id}`)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors group/board"
+            onClick={() =>
+              navigate(`/boards/${board.id}?projectId=${project.id}`)
+            }
+            className="flex items-center gap-2 px-3 py-2 rounded-md bg-neutral-50 dark:bg-neutral-800/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer transition-colors group/board"
           >
-            <div className="w-2 h-2 rounded-full bg-blue-400 group-hover/board:bg-blue-500 transition-colors" />
-            <span className="text-sm text-slate-600 group-hover/board:text-slate-800 transition-colors">
+            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 dark:bg-indigo-500 shrink-0" />
+            <span className="text-sm text-neutral-600 dark:text-neutral-300 group-hover/board:text-neutral-900 dark:group-hover/board:text-neutral-100 transition-colors truncate">
               {board.name}
             </span>
           </div>
@@ -87,12 +94,12 @@ const ProjectCard = ({
               placeholder="Board name..."
               value={newBoardName}
               onChange={(e) => setNewBoardName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddBoard()}
-              className="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-blue-400"
+              onKeyDown={(e) => e.key === 'Enter' && handleAddBoard()}
+              className={`flex-1 ${INPUT_CLS} py-1.5`}
             />
             <button
               onClick={() => setIsAddingBoard(false)}
-              className="text-xs text-slate-400 hover:text-slate-600"
+              className={`${BUTTON_SECONDARY_CLS} px-2.5 py-1.5 text-xs`}
             >
               ✕
             </button>
@@ -100,7 +107,7 @@ const ProjectCard = ({
         ) : (
           <button
             onClick={() => setIsAddingBoard(true)}
-            className="w-full text-left text-xs text-slate-300 hover:text-slate-500 mt-1 py-1 transition-colors"
+            className="w-full text-left text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 mt-0.5 py-1 px-1 transition-colors"
           >
             + Add board
           </button>
