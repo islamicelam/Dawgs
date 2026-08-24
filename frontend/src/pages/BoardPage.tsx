@@ -11,7 +11,8 @@ import {
 } from '../api/statuses';
 import { deleteBoard, getBoard, updateBoard } from '../api/boards';
 import { getUsers } from '../api/users';
-import type { Task, Status, Board, User, Label } from '../types';
+import type { Task, Status, Board, User, Label, PresenceUser } from '../types';
+import { useBoardSocket } from '../hooks/useBoardSocket';
 import {
   DndContext,
   type DragEndEvent,
@@ -73,6 +74,8 @@ const BoardPage = () => {
   const me = JSON.parse(localStorage.getItem('me') ?? 'null') as User | null;
   const canDelete = me?.role === 'ADMIN';
 
+  const [presenceUsers, setPresenceUsers] = useState<PresenceUser[]>([]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -110,6 +113,27 @@ const BoardPage = () => {
       await loadData();
     })();
   }, [loadData]);
+
+  useBoardSocket(projectId, {
+    onTaskCreated: (task) =>
+      setTasks((prev) =>
+        prev.some((t) => t.id === task.id) ? prev : [...prev, task],
+      ),
+    onTaskUpdated: (task) =>
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t))),
+    onTaskDeleted: (id) => {
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setSelectedTaskId((prev) => (prev === id ? null : prev));
+    },
+    onTaskReordered: (taskIds) =>
+      setTasks((prev) =>
+        prev.map((t) => {
+          const idx = taskIds.indexOf(t.id);
+          return idx === -1 ? t : { ...t, order: idx };
+        }),
+      ),
+    onPresence: (users) => setPresenceUsers(users),
+  });
 
   const handleCreateStatus = async () => {
     await createStatus(boardId, {
@@ -287,12 +311,33 @@ const BoardPage = () => {
             {statuses.length} columns · {tasks.length} tasks
           </p>
         </div>
-        <button
-          onClick={() => setIsStatusModalOpen(true)}
-          className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-700 transition-colors"
-        >
-          + Add column
-        </button>
+        <div className="flex items-center gap-3">
+          {presenceUsers.length > 0 && (
+            <div className="flex items-center -space-x-2">
+              {presenceUsers
+                .filter(
+                  (u, idx) =>
+                    presenceUsers.findIndex((x) => x.userId === u.userId) ===
+                    idx,
+                )
+                .map((u) => (
+                  <div
+                    key={u.userId}
+                    title={u.name}
+                    className="w-8 h-8 rounded-full bg-violet-500 text-white text-xs font-semibold flex items-center justify-center border-2 border-white shadow-sm"
+                  >
+                    {u.name.slice(0, 2).toUpperCase()}
+                  </div>
+                ))}
+            </div>
+          )}
+          <button
+            onClick={() => setIsStatusModalOpen(true)}
+            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-700 transition-colors"
+          >
+            + Add column
+          </button>
+        </div>
       </div>
 
       <div className="px-4 lg:px-6 pt-4 flex items-center gap-3 flex-wrap">
