@@ -45,7 +45,11 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { email: userDto.email },
     });
-    if (!user || !user.password || !(await bcrypt.compare(userDto.password, user.password))) {
+    if (
+      !user ||
+      !user.password ||
+      !(await bcrypt.compare(userDto.password, user.password))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
     const tokens = this.signTokens(user);
@@ -89,7 +93,7 @@ export class AuthService {
     googleId: string;
     email: string;
     name: string;
-  }) : Promise<User> {
+  }): Promise<User> {
     const { googleId, email, name } = googleProfile;
 
     let user = await this.userRepo.findOneBy({ googleId });
@@ -100,7 +104,12 @@ export class AuthService {
       user.googleId = googleId;
       return this.userRepo.save(user);
     }
-    const newUser = this.userRepo.create({ email, name, googleId, password: null });
+    const newUser = this.userRepo.create({
+      email,
+      name,
+      googleId,
+      password: null,
+    });
     return this.userRepo.save(newUser);
   }
 }

@@ -28,7 +28,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (!email) {
       return done(new Error('Email not found'));
     }
-    const user = await this.authService.findOrCreateGoogleUser({ googleId: profile.id, email, name: profile.displayName });
+    const user = await this.authService.findOrCreateGoogleUser({
+      googleId: profile.id,
+      email,
+      name: profile.displayName,
+    });
     if (!user) {
       return done(new Error('User not found'));
     }
