@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { X } from '@phosphor-icons/react';
 import {
   createProject,
   getProjects,
@@ -94,7 +95,7 @@ const ProjectsPage = () => {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-neutral-400 dark:text-neutral-500 text-sm tracking-widest uppercase">
-          Loading...
+          Fetching...
         </div>
       </div>
     );
@@ -174,7 +175,7 @@ const ProjectsPage = () => {
                 onClick={() => setSharingProject(null)}
                 className={GHOST_ICON_BUTTON_CLS}
               >
-                ✕
+                <X size={15} />
               </button>
             </div>
             <div className="space-y-2">

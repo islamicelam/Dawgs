@@ -1,4 +1,6 @@
+import { Trash } from '@phosphor-icons/react';
 import Modal from './Modal';
+import { BUTTON_DANGER_CLS, BUTTON_SECONDARY_CLS } from '../../constants/ui';
 
 const ConfirmModal = ({
   message,
@@ -15,16 +17,11 @@ const ConfirmModal = ({
         {message}
       </p>
       <div className="flex gap-2">
-        <button
-          onClick={onConfirm}
-          className="flex-1 bg-red-600 text-white rounded-md py-2 text-sm font-medium hover:bg-red-500 active:scale-[0.98] transition-all"
-        >
+        <button onClick={onConfirm} className={`flex-1 ${BUTTON_DANGER_CLS}`}>
+          <Trash size={15} />
           Delete
         </button>
-        <button
-          onClick={onCancel}
-          className="flex-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-md py-2 text-sm font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 active:scale-[0.98] transition-all"
-        >
+        <button onClick={onCancel} className={`flex-1 ${BUTTON_SECONDARY_CLS}`}>
           Cancel
         </button>
       </div>

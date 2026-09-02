@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { PencilSimple, Trash, Tag } from '@phosphor-icons/react';
 import { getTasks, createTask, reorderTasks, updateTask } from '../api/tasks';
 import { getLabels } from '../api/labels';
 import {
@@ -277,7 +278,7 @@ const BoardPage = () => {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
         <div className="text-neutral-400 dark:text-neutral-500 text-sm tracking-widest uppercase">
-          Loading...
+          Fetching...
         </div>
       </div>
     );
@@ -302,14 +303,14 @@ const BoardPage = () => {
               onClick={() => setIsEditBoardOpen(true)}
               className={`${GHOST_ICON_BUTTON_CLS} text-sm`}
             >
-              ✏️
+              <PencilSimple size={15} />
             </button>
             {canDelete && (
               <button
                 onClick={() => setIsDeleteBoardOpen(true)}
                 className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 transition-colors text-sm"
               >
-                🗑️
+                <Trash size={15} />
               </button>
             )}
           </div>
@@ -330,7 +331,7 @@ const BoardPage = () => {
                   <div
                     key={u.userId}
                     title={u.name}
-                    className="w-7 h-7 rounded-full bg-indigo-500 text-white text-[10px] font-semibold flex items-center justify-center border-2 border-white dark:border-neutral-900 shadow-sm"
+                    className="w-7 h-7 rounded-full bg-neutral-500 dark:bg-neutral-600 text-white text-[10px] font-semibold flex items-center justify-center border-2 border-white dark:border-neutral-900 shadow-sm"
                   >
                     {u.name.slice(0, 2).toUpperCase()}
                   </div>
@@ -355,7 +356,11 @@ const BoardPage = () => {
           onChange={(e) =>
             setFilterAssignId(e.target.value ? Number(e.target.value) : '')
           }
-          className={`${INPUT_CLS} w-auto py-1.5 text-xs`}
+          className={`${INPUT_CLS} w-auto py-1.5 text-xs ${
+            filterAssignId !== ''
+              ? 'border-indigo-500 dark:border-indigo-500'
+              : ''
+          }`}
         >
           <option value="">All assignees</option>
           {users.map((u) => (
@@ -370,7 +375,11 @@ const BoardPage = () => {
             onChange={(e) =>
               setFilterLabelId(e.target.value ? Number(e.target.value) : '')
             }
-            className={`${INPUT_CLS} w-auto py-1.5 text-xs`}
+            className={`${INPUT_CLS} w-auto py-1.5 text-xs ${
+              filterLabelId !== ''
+                ? 'border-indigo-500 dark:border-indigo-500'
+                : ''
+            }`}
           >
             <option value="">All labels</option>
             {labels.map((l) => (
@@ -395,9 +404,9 @@ const BoardPage = () => {
           {projectId !== null && (
             <button
               onClick={() => setIsLabelsPanelOpen(true)}
-              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 border border-neutral-200 dark:border-neutral-800 rounded-md px-3 py-1.5 transition-colors hover:border-neutral-300 dark:hover:border-neutral-700"
+              className="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 border border-neutral-200 dark:border-neutral-800 rounded-md px-3 py-1.5 transition-colors hover:border-neutral-300 dark:hover:border-neutral-700"
             >
-              🏷 Labels
+              <Tag size={14} /> Labels
             </button>
           )}
         </div>

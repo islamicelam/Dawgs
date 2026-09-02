@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X, PencilSimple, Trash } from '@phosphor-icons/react';
 import { createLabel, updateLabel, deleteLabel } from '../../api/labels';
 import type { Label } from '../../types';
 import ConfirmModal from '../common/ConfirmModal';
@@ -94,7 +95,7 @@ const LabelsPanel = ({
               Manage labels
             </h2>
             <button onClick={onClose} className={GHOST_ICON_BUTTON_CLS}>
-              ✕
+              <X size={14} />
             </button>
           </div>
 
@@ -149,7 +150,7 @@ const LabelsPanel = ({
               editingId === label.id ? (
                 <div
                   key={label.id}
-                  className="border border-indigo-200 dark:border-indigo-500/30 rounded-lg p-2.5 bg-indigo-50/50 dark:bg-indigo-500/5 flex gap-2 items-center"
+                  className="border border-neutral-300 dark:border-neutral-600 rounded-lg p-2.5 bg-neutral-100 dark:bg-neutral-800/50 flex gap-2 items-center"
                 >
                   <input
                     autoFocus
@@ -204,14 +205,16 @@ const LabelsPanel = ({
                   </span>
                   <button
                     onClick={() => startEdit(label)}
-                    className="text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-200 px-2 py-0.5 rounded transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-200 px-2 py-0.5 rounded transition-colors"
                   >
+                    <PencilSimple size={14} />
                     Edit
                   </button>
                   <button
                     onClick={() => setDeletingId(label.id)}
-                    className="text-xs text-red-400 dark:text-red-500/80 hover:text-red-600 dark:hover:text-red-400 px-2 py-0.5 rounded transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-red-400 dark:text-red-500/80 hover:text-red-600 dark:hover:text-red-400 px-2 py-0.5 rounded transition-colors"
                   >
+                    <Trash size={14} />
                     Delete
                   </button>
                 </div>

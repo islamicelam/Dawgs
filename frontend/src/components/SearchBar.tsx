@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 import { searchTasks } from '../api/search';
 import { useDebounce } from '../hooks/useDebounce';
 import PriorityBadge from './common/PriorityBadge';
@@ -64,17 +65,10 @@ const SearchBar = () => {
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
       <div className="relative">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 pointer-events-none"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path strokeLinecap="round" d="M21 21l-4.3-4.3" />
-        </svg>
+        <MagnifyingGlass
+          size={14}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 pointer-events-none"
+        />
         <input
           type="text"
           value={query}
@@ -104,7 +98,7 @@ const SearchBar = () => {
 
           {!loading && results.length === 0 && (
             <div className="px-4 py-3 text-sm text-neutral-400 dark:text-neutral-500">
-              No results
+              No scent. Try another word.
             </div>
           )}
 

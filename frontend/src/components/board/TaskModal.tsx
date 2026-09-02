@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sparkle, Trash, X } from '@phosphor-icons/react';
 import { addTaskComment, deleteTask, updateTask } from '../../api/tasks';
 import type { Task, Status, User, TaskPriority, Label } from '../../types';
 import { TASK_PRIORITIES, PRIORITY_LABEL } from '../../constants/task';
@@ -146,7 +147,7 @@ const TaskModal = ({
               onClick={onClose}
               className="text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 transition-colors"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
 
@@ -180,7 +181,7 @@ const TaskModal = ({
                         key={user.id}
                         type="button"
                         onClick={() => appendMention(user.name, 'description')}
-                        className="text-xs bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 px-2 py-0.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
+                        className="text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-0.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                       >
                         @{user.name}
                       </button>
@@ -189,9 +190,15 @@ const TaskModal = ({
                   <button
                     onClick={handleImprove}
                     disabled={isImproving || !description.trim()}
-                    className="px-3 py-1 text-xs bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 rounded-full hover:bg-violet-100 dark:hover:bg-violet-500/20 disabled:opacity-50 transition-colors shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors shrink-0"
                   >
-                    {isImproving ? 'Improving...' : '✨ Improve with AI'}
+                    {isImproving ? (
+                      'Improving...'
+                    ) : (
+                      <>
+                        <Sparkle size={14} /> Improve with AI
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -517,9 +524,9 @@ const TaskModal = ({
             {canDelete ? (
               <button
                 onClick={() => setIsDeleteOpen(true)}
-                className={BUTTON_DANGER_CLS + ' px-4'}
+                className={BUTTON_DANGER_CLS + ' px-4 inline-flex items-center gap-1.5'}
               >
-                Delete task
+                <Trash size={15} /> Delete task
               </button>
             ) : (
               <span />
