@@ -45,7 +45,7 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { email: userDto.email },
     });
-    if (!user || !(await bcrypt.compare(userDto.password, user.password))) {
+    if (!user || !user.password || !(await bcrypt.compare(userDto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
     const tokens = this.signTokens(user);
@@ -83,5 +83,24 @@ export class AuthService {
       );
       throw new InternalServerErrorException('Token refresh failed');
     }
+  }
+
+  async findOrCreateGoogleUser(googleProfile: {
+    googleId: string;
+    email: string;
+    name: string;
+  }) : Promise<User> {
+    const { googleId, email, name } = googleProfile;
+
+    let user = await this.userRepo.findOneBy({ googleId });
+    if (user) return user;
+
+    user = await this.userRepo.findOneBy({ email });
+    if (user) {
+      user.googleId = googleId;
+      return this.userRepo.save(user);
+    }
+    const newUser = this.userRepo.create({ email, name, googleId, password: null });
+    return this.userRepo.save(newUser);
   }
 }

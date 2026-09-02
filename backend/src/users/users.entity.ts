@@ -23,8 +23,11 @@ export class User {
   email: string;
 
   @Exclude()
-  @Column()
-  password: string;
+  @Column({ type: 'varchar', nullable: true })
+  password: string | null;
+
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  googleId: string | null;
 
   @Exclude()
   @Column({ type: 'varchar', nullable: true })
