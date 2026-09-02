@@ -22,7 +22,7 @@ let work pile up); always run lint+build+test locally before commit; branch off 
 PR → CI gates merge → delete branch after merge. Explain concepts junior-level when asked;
 give exact commands when the user asks "how do I...".
 
-## Current state (as of 2026-06-24)
+## Current state (as of 2026-09-01)
 
 **Labels is DONE end-to-end** (PRs #12–#13): `Label` entity (name, hex color
 `@Matches(/^#[0-9A-Fa-f]{6}$/)`), project-scoped (`@ManyToOne` Project), ManyToMany
@@ -38,22 +38,80 @@ fixed (refresh-token queue pattern — single refresh for concurrent 401s).
 
 **Global Search is DONE** (PRs #6–#10) — see previous context for full details.
 
-**ROADMAP.md is the plan of record — keep ticking it.**
+**WebSockets + Presence is DONE** (PRs #15–#16, merged): `BoardGateway` (NestJS
+Gateway / Socket.IO, `/board` namespace), `WsJwtGuard` verifies the JWT from the
+httpOnly `access_token` cookie on handshake (parses the raw cookie header with the
+`cookie` package — `cookie-parser` doesn't run on the WS upgrade request, it's
+Express-only). `TasksService` emits `task.created/updated/deleted/reordered` **after**
+each transaction resolves (never inside the callback — clients must never see an event
+for a write that could still roll back). Frontend: `useBoardSocket` hook + presence
+avatars deduped by `userId` in `BoardPage`'s header.
 
-**Next up (order agreed): Layer 1 finish:**
-1. **Board filters** ← next. Assignee/type/priority/label filters — mostly frontend
-   (Claude writes). Backend already has all data; just needs filter UI + query params
-   if server-side filtering is wanted (discuss first).
-2. **Notifications** — entity + triggers on @mentions/assignment; **reuse BullMQ** for
-   async fan-out; bell UI. Email later (Layer 3).
+**UI redesign — two waves, first merged, second in progress:**
+1. *Linear-style redesign* (PRs #17–#18, **merged**) — neutral+indigo palette,
+   light/dark toggle (`useTheme` hook, `tailwind.config.js` `darkMode: 'class'`, inline
+   pre-paint script in `index.html` to avoid a flash of the wrong theme), two-column
+   `TaskModal` (content + metadata sidebar instead of one long stacked form), applied
+   across Board, Projects, Login, Settings.
+2. *Full Dawgs brand book* (branch `feat/dawgs-brand`, **committed, not yet merged**)
+   — swapped the placeholder palette for the real brand: exact color ramps overridden
+   directly in `tailwind.config.js` (`neutral`/`indigo`/`sky`/`emerald`/`amber`/`red`
+   all remapped to brand hex — existing utility classes like `bg-neutral-950` or
+   `text-sky-500` auto-repaint everywhere with **zero** per-component edits), self-hosted
+   Inter (`@fontsource/inter`), logo mark (`public/mark.svg` + `favicon.svg`, four
+   rounded bars + a base — dog-ear silhouette), soft-outline button style (border + 8%
+   tint, no solid fills — see the six class fragments in `constants/ui.ts`), a strict
+   "accent budget" (indigo appears **only** on the mark, the active filter, and primary
+   buttons — chips/avatars/hover-states all went neutral), Phosphor icons
+   (`@phosphor-icons/react`) replacing emoji throughout, brand microcopy swaps.
+
+**Google OAuth login — branch `feat/google-oauth`, in progress, not merged, not wired
+into `AuthModule` yet.** Design decided: match existing users by `googleId` first, fall
+back to auto-link by `email` (Google verifies email ownership, so this is safe), else
+create a new password-less user. Done so far:
+- `User.password` and `User.googleId` both `string | null` (nullable; `googleId`
+  additionally `unique: true`)
+- `AuthService.findOrCreateGoogleUser()` implements the match/link/create logic above
+- `AuthService.login()` / `UsersService.update()` both null-guard `user.password`
+  before `bcrypt.compare` (a Google-only user has none)
+- `GoogleStrategy` (`passport-google-oauth20`) resolves straight to a `User` entity
+  inside `validate()` (injects `AuthService`, doesn't just pass the raw Google profile
+  through to the controller)
+
+**Still to do before this can merge:**
+1. Register `GoogleStrategy` in `AuthModule.providers` (not wired in yet)
+2. `AuthController` routes: `GET /auth/google` + `GET /auth/google/callback`
+   (`@Public() @UseGuards(AuthGuard('google'))`), reusing the existing
+   `setCookies()`/`signTokens()` helpers so `/me`/`/refresh`/the guard need zero changes
+3. Frontend (Claude's job): a "Sign in with Google" control that does a real
+   `window.location` redirect to `/auth/google` (not an axios call — OAuth needs a real
+   browser navigation to Google's consent screen), plus an `/oauth/callback` landing
+   route that calls `getMe()` and stores `me` like the existing login flow
+
+**Notifications — not started.** Next up after Google OAuth ships (entity + triggers
+on @mentions/assignment, reuse BullMQ for async fan-out; can now also push live via the
+already-built `BoardGateway`/per-user room instead of only polling — see "How to run").
+
+**ROADMAP.md is the plan of record — keep ticking it.**
 
 ## How to run / verify
 
 Dev loop: `docker compose up -d db redis elasticsearch`, then `cd backend && npm run
-start:dev` (native, hot-reload). Root `.env` is loaded via `envFilePath: ['.env','../.env']`;
-for native runs hosts must be `localhost` (overridden in gitignored `backend/.env`), in
-Docker they're service names (`db`/`elasticsearch`/`redis`). Full-docker runs need
-`--build` (frontend image is a static nginx build; also rebuild backend after changes).
+start:dev` (native, hot-reload). Root `.env`/`.env.example` is the **canonical** file —
+documents every variable, and is the **only** one `docker compose`'s `backend` service
+reads (`env_file: - .env`; `backend/.env` is never mounted into the container, only
+`backend/src` is). `backend/.env`/`backend/.env.example` is an optional, gitignored
+override layer used **only** for native (non-Docker) runs, and **only** for the handful
+of vars that actually differ between "backend in Docker" and "backend on the host":
+`DB_HOST`, `ELASTICSEARCH_NODE`, `REDIS_HOST` → `localhost` (`envFilePath:
+['.env','../.env']` loads `backend/.env` first as override, root `.env` as fallback).
+Everything else — secrets, `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL`, etc. — belongs in
+root `.env` only (`GOOGLE_CALLBACK_URL` is the same value either way — it's what the
+*browser* gets redirected to, not an internal service address, so it isn't part of the
+native/Docker split). Full-docker (`docker compose up -d --build`) needs `--build` and
+has **no hot-reload at all**: the frontend image is a static nginx build, and the
+backend Dockerfile does a one-time `npm run build` + `node dist/main.js` (no
+`--watch`) — it's a "run the whole stack once" mode, not a dev loop.
 
 Pre-commit checks (run exactly like CI — no `--fix`):
 `cd backend && npm run build && npx eslint "{src,apps,libs,test}/**/*.ts" && npm test`;
@@ -89,6 +147,31 @@ frontend: `npm run lint && npm run build`. ES sanity:
   `APP_PORT`-style server vars into Vite (`VITE_`-prefixed, separate concern).
 - Strict typing required — no `any` in production code (user called this out); `as any`
   acceptable only in test mocks.
+- TypeORM can't infer a column's SQL type from a union TS type (`string | null`) via
+  reflect-metadata — it collapses to `Object` at runtime and TypeORM throws
+  `DataTypeNotSupportedError: Data type "Object"`. Any nullable column typed as
+  `X | null` needs an **explicit** `type:` in `@Column()` (plain `string`/`number`
+  without `| null` infer fine on their own — see `refreshTokenHash`/`googleId` vs the
+  `password` bug this caused).
+- Editor errors like `Property 'x' has no initializer and is not definitely assigned`
+  on decorator-populated classes (TypeORM entities, `@WebSocketServer()` fields) are
+  often a false alarm from the editor's TS server, not the real build —
+  `npm run build` only enforces `strictPropertyInitialization` if it's actually set in
+  `tsconfig.json` (this project has `strictNullChecks: true` but not `strict: true`).
+  Fix once at the config level (`"strictPropertyInitialization": false`) instead of
+  sprinkling `!` on every field.
+- `ConfigService.get<T>()` returns `T | undefined` — breaks strict option types that
+  want a plain `T` (e.g. a passport strategy constructor's options object; the
+  resulting TS error is confusing and mentions an unrelated missing property because
+  overload resolution fails silently). Use `getOrThrow<T>()` for required config —
+  fails fast at boot with a clear error instead of passing `undefined` into a
+  third-party library.
+- Installing new deps (`npm install ...`) while the Vite dev server is already running
+  can leave a stale pre-bundled deps cache on an already-open browser tab — symptoms
+  look like a real React bug ("Invalid hook call", "Cannot read properties of null
+  (reading 'useContext')") but it's just a disconnected stale HMR client. Fix: kill the
+  dev server, `rm -rf node_modules/.vite`, restart, and load the page in a **fresh**
+  browser tab (not just `navigate` on the old one — that can still serve cached JS).
 
 ## Security debt (tracked in ROADMAP; the .env Gemini key may be compromised — there's a
 pending task chip to audit git history; default user role is ADMIN; CORS wide open;

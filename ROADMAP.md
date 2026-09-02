@@ -75,7 +75,8 @@ Introduce as features justify them:
 - **Caching & queues:** Redis (cache + pub/sub), BullMQ (background jobs)
 - **Search:** Postgres full-text / `pg_trgm` → Meilisearch / Elasticsearch; **pgvector** (semantic)
 - **Files:** S3 / MinIO uploads (multer), attachments on tasks
-- **Auth hardening:** refresh-token rotation + logout, RBAC with **CASL**, **Google OAuth** (Passport)
+- **Auth hardening:** refresh-token rotation + logout ✅, RBAC with **CASL**,
+  **Google OAuth** (Passport) — 🚧 in progress, branch `feat/google-oauth`
 - **API:** rate limiting (`@nestjs/throttler`), optional **GraphQL** alongside REST
 - **DB:** **TypeORM migrations** (retire `synchronize` for prod), read replicas later
 - **Observability:** **pino** logging, **Sentry**, **Prometheus + Grafana**, **OpenTelemetry**
@@ -86,20 +87,30 @@ Introduce as features justify them:
 
 ---
 
-## Current status (as of 2026-08-25)
+## Current status (as of 2026-09-01)
 
 - **Done:** priority/dueDate; CI; **Global Search** (ES 9 + Redis + BullMQ + outbox +
   worker + access-scoped endpoint + frontend) — PRs #6–#10; **Labels** (project-scoped
   CRUD + ManyToMany tasks + frontend picker/chips/filter/panel) — PRs #12–#13;
   **WebSockets + Presence** (`BoardGateway`, `WsJwtGuard`, live task events, presence
   avatars) — PR #15–#16; **UI redesign** (Linear-style neutral+indigo design system,
-  light/dark theme toggle, two-column task modal) across Board, Projects, Login,
-  Settings — PR #17–#18
+  light/dark theme toggle, two-column task modal, then the full Dawgs brand book —
+  real palette, self-hosted Inter, logo, soft-outline buttons, Phosphor icons,
+  accent-budget rule, microcopy) across Board, Projects, Login, Settings —
+  PR #17–#19
+- **In progress (not merged):**
+  - **Google OAuth login** — entity (`password`/`googleId` nullable) + `AuthService`
+    (`findOrCreateGoogleUser`: match by `googleId`, fall back to auto-link by email,
+    else create) + `GoogleStrategy` merged as a checkpoint (PR #20); still needs
+    `AuthModule` wiring, `AuthController` routes, and the frontend "Sign in with
+    Google" button + callback page before it actually works end-to-end
 - **Tech adopted so far:** Elasticsearch, Redis, BullMQ (queues/workers),
   transactional outbox pattern, GitHub Actions, TypeORM ManyToMany relations,
-  Socket.IO / NestJS Gateways
-- **Next up:** Layer 1 → **Board filters** (assignee/type/priority/label — mostly
-  frontend), then **Notifications** (BullMQ fan-out + bell UI, can now also push
-  live via the existing `BoardGateway` instead of only polling)
+  Socket.IO / NestJS Gateways, Passport Google OAuth strategy (backend groundwork
+  merged, not wired up yet), self-hosted web fonts, Phosphor icon system
+- **Next up:** finish **Google OAuth** (`AuthModule` wiring + controller routes +
+  frontend button), then Layer 1 → **Board filters** or **Notifications** (BullMQ
+  fan-out + bell UI, can now also push live via the existing `BoardGateway` instead
+  of only polling)
 
 > Keep this file alive: tick boxes and update "Current status" after each feature.
