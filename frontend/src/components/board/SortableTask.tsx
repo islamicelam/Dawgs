@@ -1,6 +1,7 @@
 import type { Task, Status } from '../../types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Calendar, WarningCircle } from '@phosphor-icons/react';
 import PriorityBadge from '../common/PriorityBadge';
 
 const SortableTask = ({
@@ -96,7 +97,7 @@ const SortableTask = ({
       <div className="flex items-center gap-3 mt-2 text-xs text-neutral-400 dark:text-neutral-500">
         {task.assign && (
           <span className="inline-flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[9px] font-semibold flex items-center justify-center shrink-0">
+            <span className="w-4 h-4 rounded-full bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 text-[9px] font-semibold flex items-center justify-center shrink-0">
               {task.assign.name.slice(0, 2).toUpperCase()}
             </span>
             {task.assign.name}
@@ -112,11 +113,16 @@ const SortableTask = ({
           <span
             className={
               isOverdue
-                ? 'text-red-600 dark:text-red-400 font-medium'
-                : 'text-neutral-400 dark:text-neutral-500'
+                ? 'inline-flex items-center gap-1 text-red-600 dark:text-red-400 font-medium'
+                : 'inline-flex items-center gap-1 text-neutral-400 dark:text-neutral-500'
             }
           >
-            {isOverdue ? '⚠' : '📅'} {dueLabel}
+            {isOverdue ? (
+              <WarningCircle size={14} />
+            ) : (
+              <Calendar size={14} />
+            )}
+            {dueLabel}
           </span>
         )}
       </div>
@@ -131,7 +137,7 @@ const SortableTask = ({
                 e.stopPropagation();
                 onMove(task.id, s.id);
               }}
-              className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded px-2 py-0.5 text-neutral-500 dark:text-neutral-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-colors"
+              className="text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded px-2 py-0.5 text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 hover:text-neutral-700 dark:hover:border-neutral-600 dark:hover:text-neutral-200 transition-colors"
             >
               → {s.name}
             </button>

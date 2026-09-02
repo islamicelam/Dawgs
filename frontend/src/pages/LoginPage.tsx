@@ -106,7 +106,7 @@ const LoginPage = () => {
               setIsRegister(!isRegister);
               setError('');
             }}
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 ml-1 transition-colors"
+            className="text-neutral-600 dark:text-neutral-300 underline hover:text-neutral-900 dark:hover:text-neutral-100 ml-1 transition-colors"
           >
             {isRegister ? 'Log in' : 'Register'}
           </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PencilSimple, Trash, UsersThree, X } from '@phosphor-icons/react';
 import type { Project } from '../../types';
 import { BUTTON_SECONDARY_CLS, INPUT_CLS } from '../../constants/ui';
 
@@ -45,21 +46,21 @@ const ProjectCard = ({
             onClick={() => onEdit(project)}
             className="text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 text-sm px-1 transition-colors"
           >
-            ✏️
+            <PencilSimple size={15} />
           </button>
           <button
             onClick={() => onManageShare(project)}
-            className="text-neutral-400 hover:text-indigo-600 dark:text-neutral-500 dark:hover:text-indigo-400 text-sm px-1 transition-colors"
+            className="text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200 text-sm px-1 transition-colors"
             title="Share project"
           >
-            👥
+            <UsersThree size={15} />
           </button>
           {canDelete && (
             <button
               onClick={() => onDelete(project.id)}
               className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 text-sm px-1 transition-colors"
             >
-              🗑️
+              <Trash size={15} />
             </button>
           )}
         </div>
@@ -68,7 +69,7 @@ const ProjectCard = ({
       <div className="p-2.5 flex flex-col gap-1.5">
         {project.boards.length === 0 && (
           <p className="text-xs text-neutral-300 dark:text-neutral-600 text-center py-2">
-            No boards yet
+            Nothing here yet — throw the first card in.
           </p>
         )}
         {project.boards.map((board) => (
@@ -79,7 +80,7 @@ const ProjectCard = ({
             }
             className="flex items-center gap-2 px-3 py-2 rounded-md bg-neutral-50 dark:bg-neutral-800/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer transition-colors group/board"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 dark:bg-indigo-500 shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 shrink-0" />
             <span className="text-sm text-neutral-600 dark:text-neutral-300 group-hover/board:text-neutral-900 dark:group-hover/board:text-neutral-100 transition-colors truncate">
               {board.name}
             </span>
@@ -101,7 +102,7 @@ const ProjectCard = ({
               onClick={() => setIsAddingBoard(false)}
               className={`${BUTTON_SECONDARY_CLS} px-2.5 py-1.5 text-xs`}
             >
-              ✕
+              <X size={15} />
             </button>
           </div>
         ) : (

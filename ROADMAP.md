@@ -86,13 +86,15 @@ Introduce as features justify them:
 
 ---
 
-## Current status (as of 2026-08-24)
+## Current status (as of 2026-08-25)
 
 - **Done:** priority/dueDate; CI; **Global Search** (ES 9 + Redis + BullMQ + outbox +
   worker + access-scoped endpoint + frontend) — PRs #6–#10; **Labels** (project-scoped
   CRUD + ManyToMany tasks + frontend picker/chips/filter/panel) — PRs #12–#13;
   **WebSockets + Presence** (`BoardGateway`, `WsJwtGuard`, live task events, presence
-  avatars) — PR #15
+  avatars) — PR #15–#16; **UI redesign** (Linear-style neutral+indigo design system,
+  light/dark theme toggle, two-column task modal) across Board, Projects, Login,
+  Settings — PR #17–#18
 - **Tech adopted so far:** Elasticsearch, Redis, BullMQ (queues/workers),
   transactional outbox pattern, GitHub Actions, TypeORM ManyToMany relations,
   Socket.IO / NestJS Gateways

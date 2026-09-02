@@ -6,6 +6,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { PencilSimple, Trash } from '@phosphor-icons/react';
 import SortableTask from './SortableTask';
 import ConfirmModal from '../common/ConfirmModal';
 import Modal from '../common/Modal';
@@ -113,7 +114,7 @@ const SortableColumn = ({
               }}
               className={`${GHOST_ICON_BUTTON_CLS} text-xs px-1.5 py-1 rounded`}
             >
-              ✏️
+              <PencilSimple size={15} />
             </button>
             <button
               onPointerDown={(e) => e.stopPropagation()}
@@ -123,7 +124,7 @@ const SortableColumn = ({
               }}
               className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 transition-colors text-xs px-1.5 py-1 rounded"
             >
-              🗑️
+              <Trash size={15} />
             </button>
           </div>
         </div>
