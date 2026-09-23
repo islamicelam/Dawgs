@@ -9,13 +9,23 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { Public } from './public.decorator';
 import { Request as ExpressRequest, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/users/users.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly frontendUrl: string;
+  constructor(
+    private readonly authService: AuthService,
+    private readonly config: ConfigService,
+  ) {
+    this.frontendUrl = config.getOrThrow<string>('FRONTEND_URL');
+  }
 
   private setCookies(
     res: Response,
@@ -72,5 +82,20 @@ export class AuthController {
   @Get('me')
   me(@Request() req) {
     return req.user;
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleLogin() {}
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: ExpressRequest, @Res() res: Response) {
+    const user = req.user as User;
+    const tokens = await this.authService.issuedTokens(user);
+    this.setCookies(res, tokens);
+    res.redirect(`${this.frontendUrl}/oauth/callback`);
   }
 }

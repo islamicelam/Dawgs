@@ -52,12 +52,16 @@ export class AuthService {
     ) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    return this.issuedTokens(user);
+  }
+
+  async issuedTokens(
+    user: User,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const tokens = this.signTokens(user);
     const refreshTokenHash = await bcrypt.hash(tokens.refresh_token, 10);
     await this.userRepo.save({ ...user, refreshTokenHash });
-    return {
-      ...tokens,
-    };
+    return tokens;
   }
 
   async refresh(
