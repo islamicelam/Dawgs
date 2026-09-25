@@ -22,7 +22,7 @@ let work pile up); always run lint+build+test locally before commit; branch off 
 PR → CI gates merge → delete branch after merge. Explain concepts junior-level when asked;
 give exact commands when the user asks "how do I...".
 
-## Current state (as of 2026-09-01)
+## Current state (as of 2026-09-23)
 
 **Labels is DONE end-to-end** (PRs #12–#13): `Label` entity (name, hex color
 `@Matches(/^#[0-9A-Fa-f]{6}$/)`), project-scoped (`@ManyToOne` Project), ManyToMany
@@ -53,8 +53,8 @@ avatars deduped by `userId` in `BoardPage`'s header.
    pre-paint script in `index.html` to avoid a flash of the wrong theme), two-column
    `TaskModal` (content + metadata sidebar instead of one long stacked form), applied
    across Board, Projects, Login, Settings.
-2. *Full Dawgs brand book* (branch `feat/dawgs-brand`, **committed, not yet merged**)
-   — swapped the placeholder palette for the real brand: exact color ramps overridden
+2. *Full Dawgs brand book* (PR #19, **merged**) — swapped the placeholder palette
+   for the real brand: exact color ramps overridden
    directly in `tailwind.config.js` (`neutral`/`indigo`/`sky`/`emerald`/`amber`/`red`
    all remapped to brand hex — existing utility classes like `bg-neutral-950` or
    `text-sky-500` auto-repaint everywhere with **zero** per-component edits), self-hosted
@@ -65,30 +65,43 @@ avatars deduped by `userId` in `BoardPage`'s header.
    buttons — chips/avatars/hover-states all went neutral), Phosphor icons
    (`@phosphor-icons/react`) replacing emoji throughout, brand microcopy swaps.
 
-**Google OAuth login — branch `feat/google-oauth`, in progress, not merged, not wired
-into `AuthModule` yet.** Design decided: match existing users by `googleId` first, fall
-back to auto-link by `email` (Google verifies email ownership, so this is safe), else
-create a new password-less user. Done so far:
+**Google OAuth login — DONE end-to-end** (PR #20 checkpoint + direct-to-main
+follow-up commits). Design: match existing users by `googleId` first, fall back to
+auto-link by `email` (Google verifies email ownership, so this is safe), else create
+a new password-less user.
 - `User.password` and `User.googleId` both `string | null` (nullable; `googleId`
-  additionally `unique: true`)
+  additionally `unique: true`; `password` needs an explicit `type: 'varchar'` in
+  `@Column()` — see the union-type gotcha below)
 - `AuthService.findOrCreateGoogleUser()` implements the match/link/create logic above
-- `AuthService.login()` / `UsersService.update()` both null-guard `user.password`
-  before `bcrypt.compare` (a Google-only user has none)
+- `AuthService.issuedTokens()` — sign + hash + persist `refreshTokenHash`, extracted
+  out of `login()` so both password and Google login share one token-issuance path
 - `GoogleStrategy` (`passport-google-oauth20`) resolves straight to a `User` entity
   inside `validate()` (injects `AuthService`, doesn't just pass the raw Google profile
-  through to the controller)
+  through to the controller), registered in `AuthModule.providers`
+- `AuthController` — **no `/auth` prefix** (`@Controller()` is empty, so existing
+  routes are bare `/login`/`/refresh`/`/logout`/`/me`); Google routes follow the same
+  convention: `GET /google` + `GET /google/callback` (`@Public()` +
+  `@UseGuards(AuthGuard('google'))`). The callback route reads `req.user` (populated
+  by the guard), calls `issuedTokens()`, sets cookies via the existing `setCookies()`
+  helper, then redirects (`res.redirect`, no `passthrough`) to
+  `${FRONTEND_URL}/oauth/callback`. `FRONTEND_URL` is read once in the constructor
+  into a `private readonly frontendUrl` field so a missing env var fails fast at
+  boot, same as `GoogleStrategy`'s `getOrThrow` calls — not read per-request.
+- `main.ts` now reads `FRONTEND_URL`/`APP_PORT` via `ConfigService` (`app.get()`
+  after `NestFactory.create()`) instead of `process.env` — `NODE_ENV` stays on
+  `process.env` everywhere (deployment-set convention, not a `.env` value).
+  `board.gateway.ts`'s CORS origin **must** stay on `process.env`: it's a
+  `@WebSocketGateway({...})` decorator argument, evaluated at class-definition time
+  before Nest's DI container exists, so `ConfigService` isn't reachable there.
+- Frontend: `GoogleIcon` (`components/icons/GoogleIcon.tsx`, Google's real brand
+  colors — not themed) + "Continue with Google" button on `LoginPage` (real
+  `window.location.href` redirect to `${VITE_API_URL}/google`, not axios — OAuth
+  needs a real browser navigation to Google's consent screen) + `OAuthCallbackPage`
+  (`/oauth/callback` route, public/unprotected) that calls `getMe()`, stores `me` in
+  localStorage like the existing login flow, navigates to `/projects`, shows an
+  error state on failure.
 
-**Still to do before this can merge:**
-1. Register `GoogleStrategy` in `AuthModule.providers` (not wired in yet)
-2. `AuthController` routes: `GET /auth/google` + `GET /auth/google/callback`
-   (`@Public() @UseGuards(AuthGuard('google'))`), reusing the existing
-   `setCookies()`/`signTokens()` helpers so `/me`/`/refresh`/the guard need zero changes
-3. Frontend (Claude's job): a "Sign in with Google" control that does a real
-   `window.location` redirect to `/auth/google` (not an axios call — OAuth needs a real
-   browser navigation to Google's consent screen), plus an `/oauth/callback` landing
-   route that calls `getMe()` and stores `me` like the existing login flow
-
-**Notifications — not started.** Next up after Google OAuth ships (entity + triggers
+**Notifications — not started. Next up.** Entity + triggers
 on @mentions/assignment, reuse BullMQ for async fan-out; can now also push live via the
 already-built `BoardGateway`/per-user room instead of only polling — see "How to run").
 
@@ -172,6 +185,13 @@ frontend: `npm run lint && npm run build`. ES sanity:
   (reading 'useContext')") but it's just a disconnected stale HMR client. Fix: kill the
   dev server, `rm -rf node_modules/.vite`, restart, and load the page in a **fresh**
   browser tab (not just `navigate` on the old one — that can still serve cached JS).
+- GitHub branch protection on `main` does **not** actually require the CI check to
+  pass before merging (confirmed: PR #20 merged on 2026-09-02 while its own CI run
+  was red on a prettier lint failure). "PR → CI gates merge" in the working agreement
+  is the intent, not something GitHub enforces yet — if you want a red CI to really
+  block the merge button, turn on "Require status checks to pass before merging" for
+  `Backend (lint + test + build)` and `Frontend (lint + build)` under
+  Settings → Branches on GitHub.
 
 ## Security debt (tracked in ROADMAP; the .env Gemini key may be compromised — there's a
 pending task chip to audit git history; default user role is ADMIN; CORS wide open;

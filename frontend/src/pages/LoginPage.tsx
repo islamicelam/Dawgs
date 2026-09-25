@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { getMe, login, register } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '../components/ThemeToggle';
-import { BUTTON_PRIMARY_CLS, INPUT_CLS } from '../constants/ui';
+import GoogleIcon from '../components/icons/GoogleIcon';
+import {
+  BUTTON_PRIMARY_CLS,
+  BUTTON_SECONDARY_CLS,
+  INPUT_CLS,
+} from '../constants/ui';
 
 const LoginPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -13,6 +18,10 @@ const LoginPage = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/google`;
+  };
 
   const handleSubmit = async () => {
     setError('');
@@ -52,6 +61,23 @@ const LoginPage = () => {
         <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-6">
           {isRegister ? 'Create account' : 'Log in'}
         </h1>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className={`w-full ${BUTTON_SECONDARY_CLS} mb-4`}
+        >
+          <GoogleIcon className="w-4 h-4" />
+          Continue with Google
+        </button>
+
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">
+            or
+          </span>
+          <div className="h-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+        </div>
 
         {isRegister && (
           <input

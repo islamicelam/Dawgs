@@ -1,6 +1,7 @@
 import './App.css';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import ProjectsPage from './pages/ProjectPage';
 import BoardPage from './pages/BoardPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -10,6 +11,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/boards/:id" element={<BoardPage />} />
